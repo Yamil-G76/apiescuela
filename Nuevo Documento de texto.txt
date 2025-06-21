@@ -1,0 +1,53 @@
+Login: algo simple con usuario y contraseña y que  se pueda mostrar un mensaje de error 
+
+
+Alumno : dashboard que de la bienvenida al alumno mostrando su nombre y sirva como menú para navegar entre las demás vistas o mas que nada hacer algo para rellenar y dar un pantallaso a la pagina algo q quede ahí 
+
+
+opciones del dashbord que son vistas aprte :
+perfil: donde mostrar a detalle  los datos de alumno
+
+seccion pagos :
+
+tabla para mostrar los pagados y los que se deben pagar 
+
+con un boton registrar nuevo pago que te lleve a un formulario donde se crea un pago para ese usuario 
+
+carrera, muestra de cuanto cuesta el pago , eleccion del mes a pagar
+boton canselar y registrar pago
+
+
+como administrador: un dashbord nombre del usuario
+
+como vistas :
+que pueda crear usuarios 
+que pueda crear carreras
+
+
+que pueda ver una lista de los alumnos 
+
+ : dentro que pueda o filtar o elegir opciones o hacer búsquedas por nombre carrera etc 
+
+
+
+que pueda ver los pagos de un alumno que elija en la sección alumnos 
+
+asignarle a un alumno una carrera adicional  
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,8 +1,8 @@
-
+# Modelo paymen.py
 from config.db import engine, Base
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer,  ForeignKey, DateTime
 from sqlalchemy.orm import sessionmaker, relationship
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 import datetime
 
 # region clases base
@@ -31,18 +31,8 @@ class Payment (Base) :
 class ImputPayment(BaseModel):
    id_usuarioxcarrera :int
    amount :int
-   cuota_afectada:datetime.date
+   cuota_afectada:int
 
-
-
-
-
-
-
-
-
-
-Base.metadata.create_all(bind=engine)
 
 Session = sessionmaker(bind=engine)  
 

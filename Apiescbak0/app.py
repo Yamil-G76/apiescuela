@@ -3,6 +3,7 @@ sys.tracebacklimit = 1  # Limitamos la cantidad de líneas que se muestran en el
 
 from fastapi import FastAPI
 
+from Rutas.usuario_carrera import usuario_carrera
 from Rutas.users import user
 from Rutas.career import career
 from Rutas.payment import payment
@@ -17,6 +18,7 @@ apiescu.include_router(usertype)
 apiescu.include_router(career)
 apiescu.include_router(payment)
 apiescu.include_router(user)
+apiescu.include_router(usuario_carrera)
 apiescu.add_middleware(
    CORSMiddleware,
    allow_origins=["*"],

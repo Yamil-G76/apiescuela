@@ -19,13 +19,17 @@ class Security:
         except Exception:
             return None
 
+    
+
     @classmethod
     def verify_token(cls, headers):
         if headers.get("authorization"):  # Usamos .get() para evitar KeyError
             tkn = headers["authorization"].split(" ")[1]
             try:
                 payload = jwt.decode(tkn, cls.secret, algorithms=["HS256"])
+               
                 return payload
+                
             except jwt.ExpiredSignatureError:
                 return {"success": False, "message": "Token expired!"}
             except jwt.InvalidSignatureError:
@@ -34,3 +38,4 @@ class Security:
                 return {"success": False, "message": "Invalid token!"}
             except Exception as e:
                 return {"success": False, "message": "Token: unknown error!"}
+            

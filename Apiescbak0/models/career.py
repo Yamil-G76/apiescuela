@@ -1,8 +1,8 @@
-
+# Modelo career.py
 from config.db import engine, Base
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker, relationship
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 import datetime
 
 # region clases base
@@ -33,7 +33,7 @@ class Imputcareer(BaseModel):
 
 
 
-Base.metadata.create_all(bind=engine)
+
 
 Session = sessionmaker(bind=engine)  
 

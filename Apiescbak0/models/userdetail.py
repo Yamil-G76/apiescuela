@@ -1,4 +1,4 @@
-
+# Modelo userdetail.py
 from config.db import engine, Base
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship
@@ -20,7 +20,7 @@ class UserDetail(Base):
    id_type = Column("id_type", Integer ,  ForeignKey("types.id"))
 
 
-   usertype= relationship("UserType", uselist=False, backref="userdetail")
+   usertype= relationship("UserType", uselist=False, backref="userdetails")
    usuario_carrera=relationship("UsuarioXcarrera",uselist=True, back_populates="userdetail")
 
 
@@ -34,7 +34,6 @@ class UserDetail(Base):
 
   
 # endregion
-Base.metadata.create_all(bind=engine)
 
 Session = sessionmaker(bind=engine)  
 

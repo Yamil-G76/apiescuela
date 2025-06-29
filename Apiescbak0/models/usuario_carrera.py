@@ -1,4 +1,4 @@
-
+# Modelo usuario_carrera.py
 from config.db import engine, Base
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import sessionmaker, relationship
@@ -32,7 +32,7 @@ class ImputUsuarioxcarrera(BaseModel):
    id_carrera: int
 
 
-Base.metadata.create_all(bind=engine)
+
 
 Session = sessionmaker(bind=engine)  
 

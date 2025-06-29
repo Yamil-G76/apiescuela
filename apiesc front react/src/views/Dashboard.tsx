@@ -1,94 +1,133 @@
 import { useNavigate } from "react-router-dom";
+import { FaUser, FaMoneyBill, FaGraduationCap } from "react-icons/fa";
 
 function Dashboard() {
- const navigate = useNavigate();
- const userLs =localStorage.getItem("user");
-const user = JSON.parse(userLs || "{}")
-const firstname = user.firstname
-const type = user.type
+  const navigate = useNavigate();
+  const userLs = localStorage.getItem("user");
+  const user = JSON.parse(userLs || "{}");
+  const firstname = user.firstname || "";
+  const type = user.type || "";
 
-console.log(user) 
-
-function logout (){
- localStorage.removeItem("user")
- localStorage.removeItem("token")
- navigate("/login")
+  function logout() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    navigate("/login");
   }
 
   return (
-    <div style={pageWrapperStyle}>
-      {/* Espacio para encabezado */}
-      <div style={headerPlaceholderStyle}>
-        {/* Acá podés poner luego tu componente Header */}
-      </div>
+    <div style={dashboardWrapper}>
+      {/* === Menú lateral izquierdo === */}
+      <aside style={sidebarStyle}>
+        <div style={logoStyle}>Proyecto Escuela</div>
+        <nav style={navStyle}>
+          <div style={navItemStyle}>
+            <FaUser style={iconStyle} /> Crear Usuario
+          </div>
+          <div style={navItemStyle}>
+            <FaMoneyBill style={iconStyle} /> Cargar Pagos
+          </div>
+          <div style={navItemStyle}>
+            <FaGraduationCap style={iconStyle} /> Ver Alumnos
+          </div>
+        </nav>
+      </aside>
 
-      {/* Contenido centrado */}
-      <div style={cardStyle}>
-        <div style={welcomeTextStyle}>
-          Bienvenido {type} {firstname} a tu dashboard
+      {/* === Área principal === */}
+      <main style={mainContentStyle}>
+        <div style={topBarStyle}>
+          <span style={logoutStyle} onClick={logout}>
+            Cerrar sesión
+          </span>
         </div>
 
-        <div style={dividerStyle}></div>
-
-        <button style={buttonStyle} onClick={logout}>
-          Cerrar sesión
-        </button>
-      </div>
+        <div style={welcomeBoxStyle}>
+          <h2 style={welcomeText}>Bienvenido, {type} {firstname}</h2>
+          <p style={subtext}>Seleccioná una opción del menú para comenzar.</p>
+        </div>
+      </main>
     </div>
   );
-};
-  
+}
 
-const pageWrapperStyle: React.CSSProperties = {
-  minHeight: "100vh",
+// === ESTILOS ===
+
+const dashboardWrapper: React.CSSProperties = {
   display: "flex",
-  flexDirection: "column",
-  backgroundColor: "#121212",
+  height: "100vh",
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
 };
 
-const headerPlaceholderStyle: React.CSSProperties = {
-  height: "60px", // o el alto que tendrá tu Header
-  backgroundColor: "#1a1a1a",
-  borderBottom: "1px solid #2a2a2a",
-};
-
-const cardStyle: React.CSSProperties = {
-  flexGrow: 1,
+const sidebarStyle: React.CSSProperties = {
+  width: "220px",
+  background: "linear-gradient(to bottom, #1565c0, #1e88e5)",
+  color: "white",
   display: "flex",
   flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "2rem",
+  padding: "1.5rem 1rem",
 };
 
-const welcomeTextStyle: React.CSSProperties = {
-  fontSize: "1.5rem",
-  fontWeight: "600",
-  marginBottom: "1rem",
-  color: "#ffffff",
+const logoStyle: React.CSSProperties = {
+  fontSize: "1.2rem",
+  fontWeight: "bold",
+  marginBottom: "2rem",
   textAlign: "center",
 };
 
-const dividerStyle: React.CSSProperties = {
-  width: "100%",
-  maxWidth: "400px",
-  height: "1px",
-  backgroundColor: "#444",
-  margin: "1rem 0",
+const navStyle: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "1rem",
 };
 
-const buttonStyle: React.CSSProperties = {
-  backgroundColor: "#4f9ded",
-  borderColor: "#4f9ded",
-  color: "#ffffff",
-  fontWeight: "600",
-  padding: "0.75rem 1.5rem",
-  borderRadius: "6px",
+const navItemStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "0.5rem",
   fontSize: "1rem",
-  transition: "background-color 0.3s ease",
   cursor: "pointer",
+  padding: "0.5rem 0.75rem",
+  borderRadius: "6px",
+  transition: "background-color 0.2s ease",
 };
 
+const iconStyle: React.CSSProperties = {
+  fontSize: "1.1rem",
+};
 
-export default Dashboard
+const mainContentStyle: React.CSSProperties = {
+  flexGrow: 1,
+  backgroundColor: "#f5f5f5",
+  padding: "2rem",
+  position: "relative",
+};
+
+const topBarStyle: React.CSSProperties = {
+  position: "absolute",
+  top: "1rem",
+  right: "2rem",
+};
+
+const logoutStyle: React.CSSProperties = {
+  color: "#1565c0",
+  fontWeight: 600,
+  cursor: "pointer",
+  textDecoration: "underline",
+};
+
+const welcomeBoxStyle: React.CSSProperties = {
+  marginTop: "4rem",
+  textAlign: "center",
+};
+
+const welcomeText: React.CSSProperties = {
+  fontSize: "1.8rem",
+  fontWeight: 700,
+  color: "#333",
+};
+
+const subtext: React.CSSProperties = {
+  marginTop: "1rem",
+  color: "#555",
+};
+
+export default Dashboard;

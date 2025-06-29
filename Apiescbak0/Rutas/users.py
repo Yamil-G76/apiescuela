@@ -16,7 +16,7 @@ from sqlalchemy.orm import (
 user = APIRouter()
 # region login
 
-        
+
 
 @user.post("/users/login")
 def login_user(us: InputLogin):
@@ -51,7 +51,6 @@ def login_user(us: InputLogin):
                    "message": "Usuario y/o password incorrectos!",
                },
            )
-
    except Exception as ex:
        print("Error ---->> ", ex)
    finally:

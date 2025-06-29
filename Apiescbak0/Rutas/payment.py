@@ -86,8 +86,7 @@ def pagos_me(req : Request) :
                         "cuota numero": pago.cuota_afectada,
                         "carrera": rel.carrera.name 
                         })     
-                return pagos_alumno
-            
+                return pagos_alumno          
             else:
                return JSONResponse(
                status_code=403,

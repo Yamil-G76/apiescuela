@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 from pydantic import BaseModel
 import datetime
 
+
 # region clases base
 class Career (Base): 
     __tablename__= "carreras"

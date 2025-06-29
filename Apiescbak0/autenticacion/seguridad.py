@@ -23,7 +23,7 @@ class Security:
 
     @classmethod
     def verify_token(cls, headers):
-        if headers.get("authorization"):  # Usamos .get() para evitar KeyError
+        if headers.get("Authorization"):  # Usamos .get() para evitar KeyError
             tkn = headers["authorization"].split(" ")[1]
             try:
                 payload = jwt.decode(tkn, cls.secret, algorithms=["HS256"])

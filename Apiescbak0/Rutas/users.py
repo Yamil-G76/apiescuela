@@ -16,8 +16,6 @@ from sqlalchemy.orm import (
 user = APIRouter()
 # region login
 
-
-
 @user.post("/users/login")
 def login_user(us: InputLogin):
    try:
@@ -121,7 +119,7 @@ def info_usuario(req : Request) :
         has_access = Security.verify_token(req.headers)
 
         if "iat" in has_access:
-            if has_access["usuario"]["type"]=="Alumno":
+         if has_access["usuario"]["type"]=="Alumno":
                 id_usuario= has_access["usuario"]["idusuario"]
                 user = session.query(User).options(
                 joinedload(User.userdetail).joinedload(UserDetail.usertype),
@@ -134,11 +132,23 @@ def info_usuario(req : Request) :
                 "email": user.userdetail.email,
                 "carreras": [rel.carrera.name for rel in user.userdetail.usuario_carrera]}              
                 return datos_usuario
-            else:
+         if has_access["usuario"]["type"]=="admin":
+                id_usuario= has_access["usuario"]["idusuario"]
+                user = session.query(User).options(
+                joinedload(User.userdetail)).filter(User.id == id_usuario).first()
+                datos_usuario = {
+                "usuario": user.username,
+                "firstname": user.userdetail.firstname,
+                "dni": user.userdetail.dni,
+                "lastname": user.userdetail.lastname,
+                "email": user.userdetail.email,
+                }
+                return datos_usuario
+         else:
                return JSONResponse(
-               status_code=403,
-               content="no tienes permisos ",
-             )
+              status_code=403,
+              content="no tienes permisos ",
+               )
         else:
            return JSONResponse(
             status_code=401,

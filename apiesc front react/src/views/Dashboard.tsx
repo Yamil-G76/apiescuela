@@ -1,18 +1,51 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaMoneyBill, FaGraduationCap } from "react-icons/fa";
 
+// === Tipo para los datos que retorna el backend ===
+type UserData = {
+  usuario: string;
+  firstname: string;
+  lastname: string;
+  dni: string;
+  email: string;
+
+};
+
 function Dashboard() {
+  const [userData, setUserData] = useState<UserData | null>(null);
   const navigate = useNavigate();
-  const userLs = localStorage.getItem("user");
-  const user = JSON.parse(userLs || "{}");
-  const firstname = user.firstname || "";
-  const type = user.type || "";
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:8000/user/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Token inválido");
+        return res.json();
+      })
+      .then((data: UserData) => {
+        setUserData(data);
+      })
+      .catch((err) => {
+        console.error("Error al obtener datos del usuario:", err);
+        // El manejo de redirección se hace en rutas protegidas
+      });
+  }, []);
 
   function logout() {
-    localStorage.removeItem("user");
     localStorage.removeItem("token");
     navigate("/login");
   }
+
+  if (!userData) return <p style={{ padding: "2rem" }}>Cargando...</p>;
+
+  const firstname = userData.firstname;
+  const username = userData.usuario;
 
   return (
     <div style={dashboardWrapper}>
@@ -41,7 +74,7 @@ function Dashboard() {
         </div>
 
         <div style={welcomeBoxStyle}>
-          <h2 style={welcomeText}>Bienvenido, {type} {firstname}</h2>
+          <h2 style={welcomeText}>Bienvenido Alumno o Admin {username} {firstname}</h2> / aca  elejimos despues si dejar admin o alumno cuango hagas el otro dashbord 
           <p style={subtext}>Seleccioná una opción del menú para comenzar.</p>
         </div>
       </main>

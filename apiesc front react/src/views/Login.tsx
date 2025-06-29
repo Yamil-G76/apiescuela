@@ -1,14 +1,12 @@
+
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa"; // ← Íconos sociales
-
+import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa" ; // ← Íconos sociales
 type LoginProcessResponse = {
   success: boolean;
-  token?: string;
-  user?: any;
-  message?: string;
+  token: string;
+  message: string;
 };
-
 function Login() {
   const BACKEND_IP = "localhost";
   const BACKEND_PORT = "8000";
@@ -21,15 +19,16 @@ function Login() {
   const [message, setMessage] = useState<string | null>(null);
 
   function loginProcess(dataObject: LoginProcessResponse) {
-    if (dataObject.success === true) {
-      localStorage.setItem("token", dataObject.token ?? "");
-      localStorage.setItem("user", JSON.stringify(dataObject.user));
+    if (dataObject.success === true && dataObject.token) {
+      localStorage.setItem("token", dataObject.token );
       setMessage("Iniciando sesión...");
       navigate("/dashboard");
+
     } else {
       setMessage(dataObject.message ?? "Error desconocido");
     }
-  }
+  } 
+  
 
   function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

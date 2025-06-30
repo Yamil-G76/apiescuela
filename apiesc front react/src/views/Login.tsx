@@ -1,34 +1,51 @@
-
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa" ; // ← Íconos sociales
+import { jwtDecode }   from "jwt-decode";
+
 type LoginProcessResponse = {
   success: boolean;
-  token: string;
-  message: string;
+  token?: string;
+  message?: string;
 };
-function Login() {
-  const BACKEND_IP = "localhost";
-  const BACKEND_PORT = "8000";
-  const ENDPOINT = "users/login";
-  const LOGIN_URL = `http://${BACKEND_IP}:${BACKEND_PORT}/${ENDPOINT}`;
 
+type TokenPayload = {
+  usuario: {
+    idusuario: number;
+    usuario: string;
+    type: string;
+  };
+  iat: number;
+  exp: number;
+};
+
+function Login() {
+  const BACKEND_URL = "http://localhost:8000/users/login";
   const navigate = useNavigate();
   const userInputRef = useRef<HTMLInputElement>(null);
   const passInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   function loginProcess(dataObject: LoginProcessResponse) {
-    if (dataObject.success === true && dataObject.token) {
-      localStorage.setItem("token", dataObject.token );
-      setMessage("Iniciando sesión...");
-      navigate("/dashboard");
+    if (dataObject.success && dataObject.token) {
+      localStorage.setItem("token", dataObject.token);
 
+      try {
+        const decoded: TokenPayload = jwtDecode(dataObject.token);
+        const tipo = decoded.usuario.type;
+
+        if (tipo === "admin") {
+          navigate("/Dashboard");
+        } else {
+          navigate("/alumno/dashboard");
+        }
+      } catch (error) {
+        console.error("Error al decodificar el token:", error);
+        setMessage("Token inválido");
+      }
     } else {
-      setMessage(dataObject.message ?? "Error desconocido");
+      setMessage(dataObject.message ?? "Usuario o contraseña incorrectos");
     }
-  } 
-  
+  }
 
   function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -36,39 +53,30 @@ function Login() {
     const username = userInputRef.current?.value ?? "";
     const password = passInputRef.current?.value ?? "";
 
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-
-    const raw = JSON.stringify({ username, password });
-
     const requestOptions = {
       method: "POST",
-      headers: myHeaders,
-      body: raw,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
     };
 
-    fetch(LOGIN_URL, requestOptions)
-      .then((respond) => respond.json())
+    fetch(BACKEND_URL, requestOptions)
+      .then((res) => res.json())
       .then((dataObject) => loginProcess(dataObject))
-      .catch((error) => console.log("error", error));
+      .catch((error) => {
+        console.error("Error de red:", error);
+        setMessage("Error al conectar con el servidor");
+      });
   }
 
   return (
     <div style={containerStyle}>
       <div style={cardStyle}>
-        {/* === LOGO INSTITUCIONAL (ficticio) === */}
-        <div style={logoStyle}>
-          🎓 Colegio Mariano
-        </div>
-
+        <div style={logoStyle}>🎓 Colegio Mariano</div>
         <h2 style={titleStyle}>Iniciar sesión</h2>
 
         <form onSubmit={handleLogin}>
-          {/* === Usuario === */}
           <div style={inputGroupStyle}>
-            <label htmlFor="inputUser" style={labelStyle}>
-              Usuario
-            </label>
+            <label htmlFor="inputUser" style={labelStyle}>Usuario</label>
             <input
               type="text"
               id="inputUser"
@@ -79,14 +87,11 @@ function Login() {
             />
           </div>
 
-          {/* === Contraseña === */}
           <div style={inputGroupStyle}>
-            <label htmlFor="exampleInputPassword1" style={labelStyle}>
-              Contraseña
-            </label>
+            <label htmlFor="inputPass" style={labelStyle}>Contraseña</label>
             <input
               type="password"
-              id="exampleInputPassword1"
+              id="inputPass"
               ref={passInputRef}
               style={inputStyle}
               onFocus={(e) => (e.currentTarget.style.borderColor = "#1976d2")}
@@ -94,55 +99,29 @@ function Login() {
             />
           </div>
 
-          {/* === Botón Ingresar (centrado + ancho) === */}
           <div style={{ display: "flex", justifyContent: "center" }}>
             <button
               type="submit"
-              style={{
-                ...buttonStyle,
-                width: "60%",
-                maxWidth: "280px",
-              }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = "#1565c0")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "#1976d2")
-              }
+              style={{ ...buttonStyle, width: "60%", maxWidth: "280px" }}
+              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#1565c0")}
+              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#1976d2")}
             >
               Ingresar
             </button>
           </div>
 
-          {/* === Link Crear cuenta === */}
-          <p style={linkStyle} onClick={() => navigate("/singin")}>
-            Crear una cuenta nueva
-          </p>
 
-          {/* === Mensaje login === */}
+
           {message && (
-            <div
-              className="mt-3 text-center"
-              style={messageStyle(message.includes("success"))}
-            >
-              {message}
-            </div>
+            <div style={messageStyle(false)}>{message}</div>
           )}
         </form>
-
-        {/* === Redes sociales === */}
-        <div style={socialContainerStyle}>
-          <a href="#" style={iconStyle}><FaFacebookF /></a>
-          <a href="#" style={iconStyle}><FaInstagram /></a>
-          <a href="#" style={iconStyle}><FaTwitter /></a>
-        </div>
       </div>
     </div>
   );
 }
 
-// === ESTILOS ===
-
+// === ESTILOS (sin cambios) ===
 const containerStyle: React.CSSProperties = {
   minHeight: "100vh",
   display: "flex",
@@ -213,14 +192,7 @@ const buttonStyle: React.CSSProperties = {
   transition: "background-color 0.3s ease",
 };
 
-const linkStyle: React.CSSProperties = {
-  marginTop: "1rem",
-  color: "#1976d2",
-  textDecoration: "underline",
-  textAlign: "center",
-  cursor: "pointer",
-  fontWeight: "500",
-};
+
 
 const messageStyle = (isSuccess: boolean): React.CSSProperties => ({
   color: isSuccess ? "#2e7d32" : "#d32f2f",
@@ -228,25 +200,5 @@ const messageStyle = (isSuccess: boolean): React.CSSProperties => ({
   marginTop: "1rem",
   textAlign: "center",
 });
-
-/*const forgotPasswordStyle: React.CSSProperties = {
-  fontSize: "0.875rem",
-  color: "#888",
-  marginTop: "1rem",
-  textAlign: "center",
-};*/
-
-const socialContainerStyle: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  gap: "1rem",
-  marginTop: "2rem",
-};
-
-const iconStyle: React.CSSProperties = {
-  fontSize: "1.2rem",
-  color: "#1976d2",
-  textDecoration: "none",
-};
 
 export default Login;

@@ -56,6 +56,8 @@ def login_user(us: InputLogin):
 # endregion
 # region new 
 
+
+
 @user.post("/user/new")
 def crear_usuario(user: InputUser, req : Request):
    try:
@@ -66,9 +68,7 @@ def crear_usuario(user: InputUser, req : Request):
                 if validate_username(user.username): 
                     if validate_email(user.email):            
                        usuNuevo = User(user.username, user.password)
-                       usuDetailNuevo = UserDetail (user.dni,user.firstname,user.lastname,user.email,user.type)             
-                       usuarioxcarreranuevo = UsuarioXcarrera(user.id_carrera )
-                       usuDetailNuevo.usuario_carrera.append(usuarioxcarreranuevo)
+                       usuDetailNuevo = UserDetail (user.dni,user.firstname,user.lastname,user.email,user.type)           
                        usuNuevo.userdetail=usuDetailNuevo
                        session.add(usuNuevo)
                        session.commit()
@@ -88,25 +88,14 @@ def crear_usuario(user: InputUser, req : Request):
            status_code=401,
            content=has_access,
         )  
-
-   except IntegrityError as e:  
-       # Suponiendo que el mje de error contiene "username" para el campo duplicado
-       if "username" in str(e):
-           return JSONResponse(
-               status_code=400, content={"detail": "Username ya existe"}
-           )
-       else:
-           # Maneja otros errores de integridad
-           print("Error de integridad inesperado:", e)
-           return JSONResponse(
-               status_code=500, content={"detail": "Error al agregar usuario"}
-           )                        
+                        
    except Exception as e:
        print("Error inesperado:", e)
        return JSONResponse(
            status_code=500, content={"detail": "Error al agregar usuario"}
        )
    finally: session.close()
+
 
   
 # endregion
@@ -167,7 +156,7 @@ def obtener_usuarios2(req: Request):
    
        if "iat" in has_access:
             if has_access["usuario"]["type"]=="admin":
-              usuarios = session.query(User).all()
+              usuarios = session.query(User).options(joinedload(User.userdetail)).all()
               return usuarios
             else:       
               return JSONResponse(

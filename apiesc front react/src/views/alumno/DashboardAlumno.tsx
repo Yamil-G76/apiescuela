@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUser, FaMoneyBill, FaGraduationCap } from "react-icons/fa";
+import { FaGraduationCap, FaClipboardList } from "react-icons/fa";
 
-// === Tipo para los datos que retorna el backend ===
-type UserData = {
+type AlumnoData = {
   usuario: string;
   firstname: string;
   lastname: string;
   dni: string;
   email: string;
-
+  carreras: string[];
 };
 
-function Dashboard() {
-  const [userData, setUserData] = useState<UserData | null>(null);
+function DashboardAlumno() {
+  const [alumno, setAlumno] = useState<AlumnoData | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,47 +24,39 @@ function Dashboard() {
       },
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Token inválido");
+        if (!res.ok) throw new Error("Token inválido o sin permisos");
         return res.json();
       })
-      .then((data: UserData) => {
-        setUserData(data);
-      })
+      .then((data: AlumnoData) => setAlumno(data))
       .catch((err) => {
-        console.error("Error al obtener datos del usuario:", err);
-        // El manejo de redirección se hace en rutas protegidas
+        console.error("Error al obtener datos del alumno:", err);
+        navigate("/login");
       });
-  }, []);
+  }, [navigate]);
 
-  function logout() {
+  const logout = () => {
     localStorage.removeItem("token");
     navigate("/login");
-  }
+  };
 
-  if (!userData) return <p style={{ padding: "2rem" }}>Cargando...</p>;
-
-  const firstname = userData.firstname;
-  const username = userData.usuario;
+  if (!alumno) return <p style={{ padding: "2rem" }}>Cargando datos del alumno...</p>;
 
   return (
     <div style={dashboardWrapper}>
-      {/* === Menú lateral izquierdo === */}
+      {/* === Menú lateral === */}
       <aside style={sidebarStyle}>
-        <div style={logoStyle}>Proyecto Escuela</div>
+        <div style={logoStyle}>Panel del Alumno</div>
         <nav style={navStyle}>
           <div style={navItemStyle}>
-            <FaUser style={iconStyle} /> Crear Usuario
+            <FaGraduationCap style={iconStyle} /> Mis Carreras
           </div>
           <div style={navItemStyle}>
-            <FaMoneyBill style={iconStyle} /> Cargar Pagos
-          </div>
-          <div style={navItemStyle}>
-            <FaGraduationCap style={iconStyle} /> Ver Alumnos
+            <FaClipboardList style={iconStyle} /> Ver Calificaciones
           </div>
         </nav>
       </aside>
 
-      {/* === Área principal === */}
+      {/* === Contenido principal === */}
       <main style={mainContentStyle}>
         <div style={topBarStyle}>
           <span style={logoutStyle} onClick={logout}>
@@ -74,8 +65,13 @@ function Dashboard() {
         </div>
 
         <div style={welcomeBoxStyle}>
-          <h2 style={welcomeText}>Bienvenido Alumno o Admin {username} {firstname}</h2> / aca  elejimos despues si dejar admin o alumno cuango hagas el otro dashbord 
-          <p style={subtext}>Seleccioná una opción del menú para comenzar.</p>
+          <h2 style={welcomeText}>Bienvenido, {alumno.firstname} {alumno.lastname}</h2>
+          <p style={subtext}>DNI: {alumno.dni}</p>
+          <p style={subtext}>Email: {alumno.email}</p>
+          <p style={subtext}>
+            Carreras inscriptas:{" "}
+            {alumno.carreras.length > 0 ? alumno.carreras.join(", ") : "Ninguna"}
+          </p>
         </div>
       </main>
     </div>
@@ -159,8 +155,8 @@ const welcomeText: React.CSSProperties = {
 };
 
 const subtext: React.CSSProperties = {
-  marginTop: "1rem",
+  marginTop: "0.75rem",
   color: "#555",
 };
 
-export default Dashboard;
+export default DashboardAlumno;

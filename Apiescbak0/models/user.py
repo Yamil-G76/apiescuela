@@ -56,7 +56,7 @@ class InputUser(BaseModel):
    firstname: str
    lastname: str
    type :int
-   id_carrera: int
+
 
    
 class InputLogin(BaseModel):

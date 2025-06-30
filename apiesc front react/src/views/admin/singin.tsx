@@ -20,30 +20,39 @@ function Singin() {
       return;
     }
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("No tienes permisos para crear usuarios.");
+      navigate("/login");
+      return;
+    }
+
     const nuevoUsuario = {
-      username: username,
-      password: password,
-      dni: dni,
-      firstname: firstname,
-      lastname: lastname,
-      email: email,
-      type: 2, // ← tipo alumno
-      id_carrera: 1, // ← id de carrera por defecto
+      username,
+      password,
+      dni,
+      firstname,
+      lastname,
+      email,
+      type: 2, // tipo alumno
     };
 
     try {
       const response = await fetch("http://127.0.0.1:8000/user/new", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
         body: JSON.stringify(nuevoUsuario),
       });
 
       if (response.ok) {
         alert("Usuario creado con éxito");
-        navigate("/login");
+        navigate("/dashboard");
       } else {
-        const error = await response.json();
-        alert("Error al crear usuario: " + error.detail);
+        const errorData = await response.json();
+        alert("Error al crear usuario: " + (errorData.detail || errorData));
       }
     } catch (err) {
       console.error("Error de red:", err);
@@ -92,7 +101,7 @@ function Singin() {
             <input type="text" style={inputStyle} value={dni} onChange={(e) => setDni(e.target.value)} />
           </div>
 
-          <div style={{ display: "flex", justifyContent: "center" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: "1rem" }}>
             <button
               type="submit"
               style={{ ...buttonStyle, width: "60%", maxWidth: "280px" }}
@@ -101,18 +110,21 @@ function Singin() {
             >
               Crear cuenta
             </button>
+            <button
+              type="button"
+              style={{ ...buttonStyle, width: "60%", maxWidth: "280px" }}
+              onClick={() => navigate("/dashboard")}
+            >
+              Cancelar
+            </button>
           </div>
-
-          <p style={linkStyle} onClick={() => navigate("/login")}>
-            Ya tenés cuenta? Iniciar sesión
-          </p>
         </form>
       </div>
     </div>
   );
 }
 
-// === ESTILOS ===
+// === Estilos ===
 
 const containerStyle: React.CSSProperties = {
   minHeight: "100vh",
@@ -122,30 +134,29 @@ const containerStyle: React.CSSProperties = {
   background: "linear-gradient(to right, #e9f1f7, #ffffff)",
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
   padding: "2rem",
-  overflowY: "auto",
 };
 
 const cardStyle: React.CSSProperties = {
+  maxWidth: "500px",
   width: "100%",
-  maxWidth: "420px",
   backgroundColor: "#ffffff",
   borderRadius: "12px",
   padding: "2rem",
-  boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
+  boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)",
   border: "1px solid #e0e0e0",
   color: "#333333",
 };
 
 const titleStyle: React.CSSProperties = {
-  color: "#1976d2",
+  color: "#1a237e",
   textAlign: "center",
-  marginBottom: "2rem",
+  marginBottom: "1.5rem",
 };
 
 const inputGroupStyle: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
-  marginBottom: "1.5rem",
+  marginBottom: "1.2rem",
 };
 
 const labelStyle: React.CSSProperties = {
@@ -172,18 +183,9 @@ const buttonStyle: React.CSSProperties = {
   padding: "0.75rem",
   borderRadius: "6px",
   fontSize: "1rem",
+  marginTop: "0.75rem",
   cursor: "pointer",
   transition: "background-color 0.3s ease",
-  marginTop: "1rem",
-};
-
-const linkStyle: React.CSSProperties = {
-  marginTop: "1.5rem",
-  color: "#1976d2",
-  textDecoration: "underline",
-  textAlign: "center",
-  cursor: "pointer",
-  fontWeight: "500",
 };
 
 export default Singin;

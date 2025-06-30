@@ -1,7 +1,6 @@
 from fastapi import APIRouter , Request
 from autenticacion.seguridad import Security
 
-from models.user import User
 from models.userdetail import UserDetail
 from models.usuario_carrera import session, UsuarioXcarrera , ImputUsuarioxcarrera
 from fastapi.responses import JSONResponse

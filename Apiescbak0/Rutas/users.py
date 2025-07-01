@@ -108,7 +108,7 @@ def info_usuario(req : Request) :
         has_access = Security.verify_token(req.headers)
 
         if "iat" in has_access:
-         if has_access["usuario"]["type"]=="Alumno":
+         if has_access["usuario"]["type"]=="alumno":
                 id_usuario= has_access["usuario"]["idusuario"]
                 user = session.query(User).options(
                 joinedload(User.userdetail).joinedload(UserDetail.usertype),
@@ -119,7 +119,7 @@ def info_usuario(req : Request) :
                 "dni": user.userdetail.dni,
                 "lastname": user.userdetail.lastname,
                 "email": user.userdetail.email,
-                "carreras": [rel.carrera.name for rel in user.userdetail.usuario_carrera]}              
+                  }              
                 return datos_usuario
          if has_access["usuario"]["type"]=="admin":
                 id_usuario= has_access["usuario"]["idusuario"]

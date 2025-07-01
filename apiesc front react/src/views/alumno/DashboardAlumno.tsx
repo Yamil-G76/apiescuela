@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaGraduationCap, FaClipboardList } from "react-icons/fa";
+import { FaGraduationCap, FaUser } from "react-icons/fa";
+
 
 type AlumnoData = {
   usuario: string;
   firstname: string;
   lastname: string;
-  dni: string;
-  email: string;
-  carreras: string[];
 };
 
 function DashboardAlumno() {
@@ -19,9 +17,7 @@ function DashboardAlumno() {
     const token = localStorage.getItem("token");
 
     fetch("http://localhost:8000/user/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
         if (!res.ok) throw new Error("Token inválido o sin permisos");
@@ -39,24 +35,22 @@ function DashboardAlumno() {
     navigate("/login");
   };
 
-  if (!alumno) return <p style={{ padding: "2rem" }}>Cargando datos del alumno...</p>;
+  if (!alumno) return <p style={{ padding: "2rem" }}>Cargando datos...</p>;
 
   return (
     <div style={dashboardWrapper}>
-      {/* === Menú lateral === */}
       <aside style={sidebarStyle}>
-        <div style={logoStyle}>Panel del Alumno</div>
+        <div style={logoStyle}>Alumno</div>
         <nav style={navStyle}>
-          <div style={navItemStyle}>
-            <FaGraduationCap style={iconStyle} /> Mis Carreras
+          <div style={navItemStyle} onClick={() => navigate("/alumno/mis/pagos")}>
+            <FaGraduationCap style={iconStyle} /> Mis pagos
           </div>
-          <div style={navItemStyle}>
-            <FaClipboardList style={iconStyle} /> Ver Calificaciones
+          <div style={navItemStyle} onClick={() => navigate("/alumno/mi/perfil")}>
+            <FaUser style={iconStyle} /> Mi perfil
           </div>
         </nav>
       </aside>
 
-      {/* === Contenido principal === */}
       <main style={mainContentStyle}>
         <div style={topBarStyle}>
           <span style={logoutStyle} onClick={logout}>
@@ -66,17 +60,13 @@ function DashboardAlumno() {
 
         <div style={welcomeBoxStyle}>
           <h2 style={welcomeText}>Bienvenido, {alumno.firstname} {alumno.lastname}</h2>
-          <p style={subtext}>DNI: {alumno.dni}</p>
-          <p style={subtext}>Email: {alumno.email}</p>
-          <p style={subtext}>
-            Carreras inscriptas:{" "}
-            {alumno.carreras.length > 0 ? alumno.carreras.join(", ") : "Ninguna"}
-          </p>
         </div>
       </main>
     </div>
   );
 }
+
+
 
 // === ESTILOS ===
 
@@ -154,9 +144,6 @@ const welcomeText: React.CSSProperties = {
   color: "#333",
 };
 
-const subtext: React.CSSProperties = {
-  marginTop: "0.75rem",
-  color: "#555",
-};
+
 
 export default DashboardAlumno;

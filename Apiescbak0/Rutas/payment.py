@@ -102,7 +102,7 @@ def pagos_me(req : Request) :
     try:     
         has_access = Security.verify_token(req.headers)
         if "iat" in has_access:
-            if has_access["usuario"]["type"]=="Alumno":
+            if has_access["usuario"]["type"]=="alumno":
                 id_usuario= has_access["usuario"]["idusuario"]
                 UsuarioXcarrera_payment = session.query(UsuarioXcarrera).options(joinedload(UsuarioXcarrera.payment), joinedload(UsuarioXcarrera.carrera)).filter(UsuarioXcarrera.id_userdetail == id_usuario).all()
                 pagos_alumno= []  

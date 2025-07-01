@@ -13,6 +13,8 @@ import VerCarreras from "./views/admin/listaCarreras"
 import AsignarCarrera from "./views/admin/asignarCarreras"
 import CargarPago from "./views/admin/cargarPago";
 import VerPagos from "./views/admin/VerPagos";
+import MisPagos from "./views/alumno/PagosAlumno";
+import MiPerfil from "./views/alumno/perfil";
 function App() {
   return (
     <BrowserRouter>
@@ -38,6 +40,8 @@ function App() {
         {/* === Rutas protegidas para ALUMNO === */}
         <Route element={<AlumnoRoutes />}>
           <Route path="/alumno/dashboard" element={<DashboardAlumno />} />
+          <Route path="/alumno/mis/pagos" element={<MisPagos />} />  
+          <Route path="/alumno/mi/perfil" element={<MiPerfil />} />        
         </Route>
         
 

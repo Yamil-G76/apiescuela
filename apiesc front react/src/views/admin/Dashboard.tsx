@@ -62,9 +62,18 @@ function DashboardAdmin() {
           <div style={navItemStyle} onClick={() => navigate("/singin")}>
             <FaUser style={iconStyle}/> Agregar Alumno
           </div> 
-         <div style={navItemStyle} onClick={() => navigate("/admin/alumnos")} >
+         <div style={navItemStyle} onClick={() => navigate("/admin/alumnos/lista")} >
             <FaGraduationCap style={iconStyle} /> Ver Alumnos
          </div>
+         <div style={navItemStyle} onClick={() => navigate("/admin/carrera/nueva")} >
+            <FaGraduationCap style={iconStyle} /> agregar Carreras
+         </div>
+         <div style={navItemStyle} onClick={() => navigate("/admin/carrera/lista")} >
+            <FaGraduationCap style={iconStyle} /> ver Carreras
+         </div>
+         <div style={navItemStyle} onClick={() => navigate("/admin/carrera/asignar")} >
+            <FaGraduationCap style={iconStyle} /> asignar Carreras
+         </div>            
           <div style={navItemStyle}>
             <FaMoneyBill style={iconStyle} /> Cargar Pagos
           </div>
@@ -74,12 +83,7 @@ function DashboardAdmin() {
           <div style={navItemStyle}>
             <FaUser style={iconStyle} /> asignar carreras a usuarios
           </div>
-          <div style={navItemStyle}>
-            <FaUser style={iconStyle} /> crear carreras
-          </div>          
-           <div style={navItemStyle}>
-            <FaUser style={iconStyle} /> ver todas las carreras
-          </div>         
+
           <div style={navItemStyle}>
             <FaUser style={iconStyle} /> asignar carreras a usuarios
           </div>

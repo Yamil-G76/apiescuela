@@ -8,6 +8,9 @@ import AdminRoutes from "./components/routes/AdminRoutes";
 import AlumnoRoutes from "./components/routes/AlumnoRoutes";
 import Forbidden from "./views/Forbidden";
 import VerAlumnos from "./views/admin/listaAlumnsos";
+import CrearCarrera from "./views/admin/AddCarrera";
+import VerCarreras from "./views/admin/listaCarreras"
+import AsignarCarrera from "./views/admin/asignarCarreras"
 function App() {
   return (
     <BrowserRouter>
@@ -22,7 +25,10 @@ function App() {
         <Route element={<AdminRoutes />}>
           <Route path="/dashboard" element={<DashboardAdmin />} />
           <Route path="/singin" element={<Singin />} />
-          <Route path="/admin/alumnos" element={<VerAlumnos />} />
+          <Route path="/admin/alumnos/lista" element={<VerAlumnos />} />
+          <Route path="/admin/carrera/nueva" element={<CrearCarrera />} />
+          <Route path="/admin/carrera/lista" element={<VerCarreras />} />
+          <Route path="/admin/carrera/asignar" element={<AsignarCarrera />} />           
         </Route>
 
         {/* === Rutas protegidas para ALUMNO === */}

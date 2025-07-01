@@ -148,30 +148,28 @@ def info_usuario(req : Request) :
     finally:
        session.close()
 
-
 @user.get("/users/all")
-def obtener_usuarios2(req: Request):
-   try:
-       has_access = Security.verify_token(req.headers)
-   
-       if "iat" in has_access:
-            if has_access["usuario"]["type"]=="admin":
-              usuarios = session.query(User).options(joinedload(User.userdetail)).all()
-              return usuarios
-            else:       
-              return JSONResponse(
-               status_code=403,
-               content="no tienes permisos ",
-            )
-       else:
-          return JSONResponse(
-           status_code=401,
-           content=has_access,
-        )
-   except Exception as ex:
-       print("Error ---->> ", ex)
-   finally:
-       session.close()
+def obtener_alumnos(req: Request):
+    try:
+        has_access = Security.verify_token(req.headers)
+
+        if "iat" in has_access:
+            if has_access["usuario"]["type"] == "admin":
+                alumnos = (
+                    session.query(User).join(User.userdetail).options(joinedload(User.userdetail)).filter(UserDetail.id_type == 2).all()
+                )
+                return alumnos
+            else:
+                return JSONResponse(status_code=403, content="No tienes permisos")
+        else:
+            return JSONResponse(status_code=401, content=has_access)
+
+    except Exception as ex:
+        print("Error ---->> ", ex)
+        return JSONResponse(status_code=500, content="Error interno")
+
+    finally:
+        session.close()
 # endregion
 
 

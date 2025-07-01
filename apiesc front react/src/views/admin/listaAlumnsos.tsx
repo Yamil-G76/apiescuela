@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
 type User = {
-  id: number;
-  username: string;
-  userdetail?: {
+   id: number;
+   username: string;
+   userdetail?: {
     dni: string;
     firstname: string;
     lastname: string;

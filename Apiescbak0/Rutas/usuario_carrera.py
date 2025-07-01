@@ -77,6 +77,40 @@ def obtener_carreras_por_usuario(id_user: int, req: Request):
     finally:
         session.close()
 
+
+
+#para usar al asignar pagos
+@usuario_carrera.get("/usuario/carrera/relaciones/{id_user}")
+def obtener_carreras_por_usuario(id_user: int, req: Request):
+    try:
+        has_access = Security.verify_token(req.headers)
+        if "iat" in has_access:
+            if has_access["usuario"]["type"] == "admin":
+                relaciones = session.query(UsuarioXcarrera).options(
+                    joinedload(UsuarioXcarrera.carrera)
+                ).filter(UsuarioXcarrera.id_userdetail == id_user).all()
+
+                carreras = [
+                    {
+                        "id": rel.carrera.id,
+                        "name": rel.carrera.name,
+                        "costo_mensual": rel.carrera.costo_mensual,
+                        "id_usuarioxcarrera": rel.id
+                    }
+                    for rel in relaciones
+                ]
+                return carreras
+            else:
+                return JSONResponse(status_code=403, content="No tienes permisos")
+        else:
+            return JSONResponse(status_code=401, content=has_access)
+    except Exception as ex:
+        print("Error ---->> ", ex)
+        return JSONResponse(status_code=500, content="Error interno")
+    finally:
+        session.close()
+
+
 @usuario_carrera.get("/usuario/carrera/all")
 def obtener_usuarios_carreras(req :Request):
    try:     

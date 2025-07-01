@@ -5,7 +5,7 @@ interface TokenPayload {
   usuario: {
     idusuario: number;
     username: string;
-    type: "admin" | "Alumno";
+    type: "admin" | "alumno";
   };
   iat: number;
   exp?: number;

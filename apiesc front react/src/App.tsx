@@ -11,6 +11,8 @@ import VerAlumnos from "./views/admin/listaAlumnsos";
 import CrearCarrera from "./views/admin/AddCarrera";
 import VerCarreras from "./views/admin/listaCarreras"
 import AsignarCarrera from "./views/admin/asignarCarreras"
+import CargarPago from "./views/admin/cargarPago";
+import VerPagos from "./views/admin/VerPagos";
 function App() {
   return (
     <BrowserRouter>
@@ -28,7 +30,9 @@ function App() {
           <Route path="/admin/alumnos/lista" element={<VerAlumnos />} />
           <Route path="/admin/carrera/nueva" element={<CrearCarrera />} />
           <Route path="/admin/carrera/lista" element={<VerCarreras />} />
-          <Route path="/admin/carrera/asignar" element={<AsignarCarrera />} />           
+          <Route path="/admin/carrera/asignar" element={<AsignarCarrera />} /> 
+          <Route path="/admin/cargar/pago" element={<CargarPago />} />  
+          <Route path="/admin/ver/pago" element={<VerPagos />} />          
         </Route>
 
         {/* === Rutas protegidas para ALUMNO === */}

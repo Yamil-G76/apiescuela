@@ -6,7 +6,7 @@ interface TokenPayload {
   usuario: {
     idusuario: number;
     username: string;
-    type: "admin" | "Alumno";
+    type: "admin" | "alumno";
   };
   iat: number;
   exp?: number;
@@ -22,7 +22,7 @@ function AlumnoRoutes() {
   try {
     const decoded = jwtDecode<TokenPayload>(token);
 
-    if (decoded.usuario.type !== "Alumno") {
+    if (decoded.usuario.type !== "alumno") {
       return <Navigate to="/forbidden" />;
     }
   } catch (err) {

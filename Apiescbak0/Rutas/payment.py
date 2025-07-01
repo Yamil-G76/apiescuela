@@ -60,7 +60,7 @@ def pagos_por_relacion(id_usuarioxcarrera: int, req: Request):
                         "id": p.id,
                         "cuota_afectada": p.cuota_afectada,
                         "amount": p.amount,
-                        "fecha": p.created_at.strftime("%Y-%m-%d"),
+                        "created_at": p.created_at.strftime("%Y-%m-%d"),
                     }
                     for p in pagos
                 ]

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaGraduationCap, FaUser } from "react-icons/fa";
 
-
 type AlumnoData = {
   usuario: string;
   firstname: string;
@@ -25,7 +24,7 @@ function DashboardAlumno() {
       })
       .then((data: AlumnoData) => setAlumno(data))
       .catch((err) => {
-        console.error("Error al obtener datos del alumno:", err);
+        console.error("Error al obtener datos del estudiante:", err);
         navigate("/login");
       });
   }, [navigate]);
@@ -40,12 +39,22 @@ function DashboardAlumno() {
   return (
     <div style={dashboardWrapper}>
       <aside style={sidebarStyle}>
-        <div style={logoStyle}>Alumno</div>
+        <div style={logoStyle}>Estudiante</div>
         <nav style={navStyle}>
-          <div style={navItemStyle} onClick={() => navigate("/alumno/mis/pagos")}>
+          <div
+            style={navItemStyle}
+            onClick={() => navigate("/alumno/mis/pagos")}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#1976d2")}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+          >
             <FaGraduationCap style={iconStyle} /> Mis pagos
           </div>
-          <div style={navItemStyle} onClick={() => navigate("/alumno/mi/perfil")}>
+          <div
+            style={navItemStyle}
+            onClick={() => navigate("/alumno/mi/perfil")}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#1976d2")}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+          >
             <FaUser style={iconStyle} /> Mi perfil
           </div>
         </nav>
@@ -65,8 +74,6 @@ function DashboardAlumno() {
     </div>
   );
 }
-
-
 
 // === ESTILOS ===
 
@@ -143,7 +150,5 @@ const welcomeText: React.CSSProperties = {
   fontWeight: 700,
   color: "#333",
 };
-
-
 
 export default DashboardAlumno;

@@ -12,6 +12,8 @@ type Career = {
 
 function VerCarreras() {
   const [carreras, setCarreras] = useState<Career[]>([]);
+  const [search, setSearch] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,61 +37,71 @@ function VerCarreras() {
       })
       .catch((err) => {
         console.error("Error al obtener carreras:", err);
+        setError("No se pudieron cargar las carreras.");
         localStorage.removeItem("token");
         navigate("/login");
       });
   }, [navigate]);
+
+  const carrerasFiltradas = carreras.filter((carrera) =>
+    carrera.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div style={containerStyle}>
       <div style={cardStyle}>
         <h2 style={titleStyle}>Listado de Carreras</h2>
 
-        {carreras.length === 0 ? (
-          <p style={{ textAlign: "center", margin: "2rem" }}>No hay carreras registradas.</p>
-        ) : (
-          <table style={tableStyle}>
-            <thead>
-              <tr>
-                <th style={td}>Nombre</th>
-                <th style={td}>Mensualidad</th>
-                <th style={td}>Duración</th>
-                <th style={td}>Inicio</th>
-              </tr>
-            </thead>
-            <tbody>
-              {carreras.map((carrera) => (
-                <tr key={carrera.id}>
-                  <td style={td}>{carrera.name}</td>
-                  <td style={td}>${carrera.costo_mensual}</td>
-                  <td style={td}>{carrera.duracion_meses} meses</td>
-                  <td style={td}>{new Date(carrera.inicio_cursado).toLocaleDateString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <input
+          type="text"
+          placeholder="Buscar carrera..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={searchStyle}
+        />
 
-        <div style={{ textAlign: "center", marginTop: "2rem" }}>
-          <button style={buttonStyle} onClick={() => navigate("/dashboard")}>
-            Volver al Dashboard
-          </button>
-        </div>
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
+        <table style={tableStyle}>
+          <thead>
+            <tr style={headerRowStyle}>
+              <th style={thStyle}>Nombre</th>
+              <th style={thStyle}>Mensualidad</th>
+              <th style={thStyle}>Duración</th>
+              <th style={thStyle}>Inicio</th>
+            </tr>
+          </thead>
+          <tbody>
+            {carrerasFiltradas.map((carrera) => (
+              <tr key={carrera.id} style={rowStyle}>
+                <td style={tdStyle}>{carrera.name}</td>
+                <td style={tdStyle}>${carrera.costo_mensual}</td>
+                <td style={tdStyle}>{carrera.duracion_meses} meses</td>
+                <td style={tdStyle}>
+                  {new Date(carrera.inicio_cursado).toLocaleDateString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <p style={totalTextStyle}>Total de carreras: {carrerasFiltradas.length}</p>
+
+        <p style={linkStyle} onClick={() => navigate("/dashboard")}>Volver al Dashboard</p>
       </div>
     </div>
   );
 }
 
 // === Estilos ===
-
 const containerStyle: React.CSSProperties = {
   minHeight: "100vh",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: "linear-gradient(to right, #f3f8fc, #ffffff)",
-  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  background: "linear-gradient(to right, #e9f1f7, #ffffff)",
   padding: "2rem",
+  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
 };
 
 const cardStyle: React.CSSProperties = {
@@ -103,9 +115,18 @@ const cardStyle: React.CSSProperties = {
 };
 
 const titleStyle: React.CSSProperties = {
-  textAlign: "center",
   color: "#1a237e",
+  textAlign: "center",
   marginBottom: "1.5rem",
+};
+
+const searchStyle: React.CSSProperties = {
+  marginBottom: "1.5rem",
+  width: "100%",
+  padding: "0.75rem",
+  fontSize: "1rem",
+  borderRadius: "6px",
+  border: "1px solid #ccc",
 };
 
 const tableStyle: React.CSSProperties = {
@@ -113,26 +134,37 @@ const tableStyle: React.CSSProperties = {
   borderCollapse: "collapse",
 };
 
-const td : React.CSSProperties ={
-    border:"1px solid #ccc",
-    padding:"0.75rem",
-    textAlign:"left",
-}
-
-
-
-
-const buttonStyle: React.CSSProperties = {
+const headerRowStyle: React.CSSProperties = {
   backgroundColor: "#1976d2",
-  border: "none",
-  color: "#fff",
-  padding: "0.75rem 1.5rem",
-  fontSize: "1rem",
-  fontWeight: 600,
-  borderRadius: "6px",
-  cursor: "pointer",
+  color: "white",
 };
 
+const thStyle: React.CSSProperties = {
+  padding: "0.75rem",
+  textAlign: "left",
+};
 
+const rowStyle: React.CSSProperties = {
+  borderBottom: "1px solid #ccc",
+};
+
+const tdStyle: React.CSSProperties = {
+  padding: "0.75rem",
+};
+
+const totalTextStyle: React.CSSProperties = {
+  marginTop: "1.5rem",
+  textAlign: "right",
+  fontWeight: 600,
+  color: "#333",
+};
+
+const linkStyle: React.CSSProperties = {
+  marginTop: "2rem",
+  textAlign: "center",
+  color: "#1976d2",
+  textDecoration: "underline",
+  cursor: "pointer",
+};
 
 export default VerCarreras;

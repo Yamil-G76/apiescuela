@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode }   from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
+import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
 
 type LoginProcessResponse = {
   success: boolean;
@@ -71,10 +72,12 @@ function Login() {
   return (
     <div style={containerStyle}>
       <div style={cardStyle}>
+        {/* === Título con logo === */}
         <div style={logoStyle}>🎓 Colegio Mariano</div>
         <h2 style={titleStyle}>Iniciar sesión</h2>
 
         <form onSubmit={handleLogin}>
+          {/* === Usuario === */}
           <div style={inputGroupStyle}>
             <label htmlFor="inputUser" style={labelStyle}>Usuario</label>
             <input
@@ -87,6 +90,7 @@ function Login() {
             />
           </div>
 
+          {/* === Contraseña === */}
           <div style={inputGroupStyle}>
             <label htmlFor="inputPass" style={labelStyle}>Contraseña</label>
             <input
@@ -99,6 +103,7 @@ function Login() {
             />
           </div>
 
+          {/* === Botón Ingresar === */}
           <div style={{ display: "flex", justifyContent: "center" }}>
             <button
               type="submit"
@@ -110,18 +115,25 @@ function Login() {
             </button>
           </div>
 
+          {/* === Link recuperar contraseña === */}
+          <p style={linkStyle}>¿Olvidaste tu contraseña?</p>
 
-
-          {message && (
-            <div style={messageStyle(false)}>{message}</div>
-          )}
+          {/* === Mensaje de error o éxito === */}
+          {message && <div style={messageStyle(false)}>{message}</div>}
         </form>
+
+        {/* === Íconos de redes sociales === */}
+        <div style={socialContainerStyle}>
+          <FaFacebook style={iconStyle} />
+          <FaInstagram style={iconStyle} />
+          <FaTwitter style={iconStyle} />
+        </div>
       </div>
     </div>
   );
 }
 
-// === ESTILOS (sin cambios) ===
+// === ESTILOS ===
 const containerStyle: React.CSSProperties = {
   minHeight: "100vh",
   display: "flex",
@@ -144,15 +156,15 @@ const cardStyle: React.CSSProperties = {
 };
 
 const logoStyle: React.CSSProperties = {
-  fontSize: "1.5rem",
+  fontSize: "1.7rem",
   fontWeight: "bold",
-  color: "#1a237e",
+  color: "#000000", // ← Negro
   marginBottom: "1rem",
   textAlign: "center",
 };
 
 const titleStyle: React.CSSProperties = {
-  color: "#1a237e",
+  color: "#000000", // ← Negro
   textAlign: "center",
   marginBottom: "1.5rem",
 };
@@ -192,7 +204,27 @@ const buttonStyle: React.CSSProperties = {
   transition: "background-color 0.3s ease",
 };
 
+const linkStyle: React.CSSProperties = {
+  marginTop: "1rem",
+  color: "#1976d2",
+  textDecoration: "underline",
+  textAlign: "center",
+  cursor: "pointer",
+  fontWeight: "500",
+};
 
+const socialContainerStyle: React.CSSProperties = {
+  marginTop: "1.5rem",
+  display: "flex",
+  justifyContent: "center",
+  gap: "1.5rem",
+};
+
+const iconStyle: React.CSSProperties = {
+  fontSize: "1.2rem",
+  color: "#1976d2",
+  cursor: "pointer",
+};
 
 const messageStyle = (isSuccess: boolean): React.CSSProperties => ({
   color: isSuccess ? "#2e7d32" : "#d32f2f",

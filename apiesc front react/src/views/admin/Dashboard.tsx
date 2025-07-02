@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaMoneyBill, FaGraduationCap } from "react-icons/fa";
 
-
-
 // === Tipo para los datos que retorna el backend ===
 type UserData = {
   usuario: string;
@@ -15,12 +13,11 @@ type UserData = {
 
 function DashboardAdmin() {
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
-
 
     fetch("http://localhost:8000/user/me", {
       headers: {
@@ -30,14 +27,12 @@ function DashboardAdmin() {
       .then((res) => {
         if (!res.ok) throw new Error("Token inválido");
         return res.json();
-
       })
       .then((data: UserData) => {
         setUserData(data);
       })
       .catch((err) => {
         console.error("Error al obtener datos del usuario:", err);
-        // El manejo de redirección se hace en rutas protegidas
         localStorage.removeItem("token");
         navigate("/login");
       });
@@ -48,7 +43,7 @@ function DashboardAdmin() {
     navigate("/login");
   }
 
-     if (!userData)  return <p style={{ padding: "2rem" }}>Cargando...</p>;     
+  if (!userData) return <p style={{ padding: "2rem" }}>Cargando...</p>;
 
   const firstname = userData.firstname;
   const username = userData.usuario;
@@ -57,28 +52,63 @@ function DashboardAdmin() {
     <div style={dashboardWrapper}>
       {/* === Menú lateral izquierdo === */}
       <aside style={sidebarStyle}>
-        <div style={logoStyle}>Proyecto Escuela</div>
+        <div style={logoStyle}>ISMM</div>
         <nav style={navStyle}>
-          <div style={navItemStyle} onClick={() => navigate("/singin")}>
-            <FaUser style={iconStyle}/> Agregar Alumno
-          </div> 
-         <div style={navItemStyle} onClick={() => navigate("/admin/alumnos/lista")} >
+          <div
+            style={getNavItemStyle(hoveredItem === "agregar")}
+            onMouseEnter={() => setHoveredItem("agregar")}
+            onMouseLeave={() => setHoveredItem(null)}
+            onClick={() => navigate("/singin")}
+          >
+            <FaUser style={iconStyle} /> Agregar Alumno
+          </div>
+          <div
+            style={getNavItemStyle(hoveredItem === "verAlumnos")}
+            onMouseEnter={() => setHoveredItem("verAlumnos")}
+            onMouseLeave={() => setHoveredItem(null)}
+            onClick={() => navigate("/admin/alumnos/lista")}
+          >
             <FaGraduationCap style={iconStyle} /> Ver Alumnos
-         </div>
-         <div style={navItemStyle} onClick={() => navigate("/admin/carrera/nueva")} >
-            <FaGraduationCap style={iconStyle} /> agregar Carreras
-         </div>
-         <div style={navItemStyle} onClick={() => navigate("/admin/carrera/lista")} >
-            <FaGraduationCap style={iconStyle} /> ver Carreras
-         </div>
-         <div style={navItemStyle} onClick={() => navigate("/admin/carrera/asignar")} >
-            <FaGraduationCap style={iconStyle} /> asignar Carreras
-         </div>            
-          <div style={navItemStyle} onClick={() => navigate("/admin/cargar/pago")} >
+          </div>
+          <div
+            style={getNavItemStyle(hoveredItem === "agregarCarrera")}
+            onMouseEnter={() => setHoveredItem("agregarCarrera")}
+            onMouseLeave={() => setHoveredItem(null)}
+            onClick={() => navigate("/admin/carrera/nueva")}
+          >
+            <FaGraduationCap style={iconStyle} /> Agregar Carreras
+          </div>
+          <div
+            style={getNavItemStyle(hoveredItem === "verCarreras")}
+            onMouseEnter={() => setHoveredItem("verCarreras")}
+            onMouseLeave={() => setHoveredItem(null)}
+            onClick={() => navigate("/admin/carrera/lista")}
+          >
+            <FaGraduationCap style={iconStyle} /> Ver Carreras
+          </div>
+          <div
+            style={getNavItemStyle(hoveredItem === "asignarCarreras")}
+            onMouseEnter={() => setHoveredItem("asignarCarreras")}
+            onMouseLeave={() => setHoveredItem(null)}
+            onClick={() => navigate("/admin/carrera/asignar")}
+          >
+            <FaGraduationCap style={iconStyle} /> Asignar Carreras
+          </div>
+          <div
+            style={getNavItemStyle(hoveredItem === "cargarPagos")}
+            onMouseEnter={() => setHoveredItem("cargarPagos")}
+            onMouseLeave={() => setHoveredItem(null)}
+            onClick={() => navigate("/admin/cargar/pago")}
+          >
             <FaMoneyBill style={iconStyle} /> Cargar Pagos
           </div>
-          <div style={navItemStyle} onClick={() => navigate("/admin/ver/pago")} >
-            <FaMoneyBill style={iconStyle} /> ver Pagos
+          <div
+            style={getNavItemStyle(hoveredItem === "verPagos")}
+            onMouseEnter={() => setHoveredItem("verPagos")}
+            onMouseLeave={() => setHoveredItem(null)}
+            onClick={() => navigate("/admin/ver/pago")}
+          >
+            <FaMoneyBill style={iconStyle} /> Ver Pagos
           </div>
         </nav>
       </aside>
@@ -92,7 +122,7 @@ function DashboardAdmin() {
         </div>
 
         <div style={welcomeBoxStyle}>
-          <h2 style={welcomeText}>Bienvenido Al Dashboard Amninistrativo {username} {firstname}</h2>
+          <h2 style={welcomeText}>Bienvenido Al Dashboard Administrativo {username} {firstname}</h2>
           <p style={subtext}>Seleccioná una opción del menú para comenzar.</p>
         </div>
       </main>
@@ -130,7 +160,7 @@ const navStyle: React.CSSProperties = {
   gap: "1rem",
 };
 
-const navItemStyle: React.CSSProperties = {
+const getNavItemStyle = (isHovered: boolean): React.CSSProperties => ({
   display: "flex",
   alignItems: "center",
   gap: "0.5rem",
@@ -138,8 +168,9 @@ const navItemStyle: React.CSSProperties = {
   cursor: "pointer",
   padding: "0.5rem 0.75rem",
   borderRadius: "6px",
+  backgroundColor: isHovered ? "rgba(255,255,255,0.2)" : "transparent",
   transition: "background-color 0.2s ease",
-};
+});
 
 const iconStyle: React.CSSProperties = {
   fontSize: "1.1rem",

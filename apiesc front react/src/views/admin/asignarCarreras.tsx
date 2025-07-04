@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Modal from "react-modal";
+
+// Tipo de datos
 type Alumno = {
-   id: number;
-   username: string;
-   userdetail?: {
+  id: number;
+  username: string;
+  userdetail?: {
     dni: string;
     firstname: string;
     lastname: string;
     email: string;
-    id_type: number;}
+    id_type: number;
+  };
 };
 
 type Carrera = {
@@ -16,16 +20,19 @@ type Carrera = {
   name: string;
 };
 
-function AsignarCarrera() {
+interface AsignarCarreraProps {
+  isOpen: boolean;
+  onRequestClose: () => void;
+}
 
-  const  navigate = useNavigate() 
+function AsignarCarrera({ isOpen, onRequestClose }: AsignarCarreraProps) {
+  const navigate = useNavigate(); // Redirección
   const [alumnos, setAlumnos] = useState<Alumno[]>([]);
   const [carreras, setCarreras] = useState<Carrera[]>([]);
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<Alumno | null>(null);
   const [carrerasAsignadas, setCarrerasAsignadas] = useState<Carrera[]>([]);
   const [carreraNueva, setCarreraNueva] = useState<number | "">("");
 
-  // Traer alumnos al montar
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -38,7 +45,6 @@ function AsignarCarrera() {
       .catch(console.error);
   }, []);
 
-  // Traer carreras disponibles
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -51,7 +57,6 @@ function AsignarCarrera() {
       .catch(console.error);
   }, []);
 
-  // Traer carreras asignadas cuando cambia el alumno seleccionado
   useEffect(() => {
     if (!alumnoSeleccionado) {
       setCarrerasAsignadas([]);
@@ -68,7 +73,6 @@ function AsignarCarrera() {
       .catch(console.error);
   }, [alumnoSeleccionado]);
 
-  // Asignar nueva carrera
   const handleAsignarCarrera = async () => {
     if (!alumnoSeleccionado || carreraNueva === "") {
       alert("Seleccioná alumno y carrera");
@@ -96,13 +100,8 @@ function AsignarCarrera() {
 
       if (res.ok) {
         alert("Carrera asignada con éxito");
-        // Actualizo la lista de carreras asignadas
-        const updated = await fetch(`http://127.0.0.1:8000/usuario/carrera/${alumnoSeleccionado.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await updated.json();
-        setCarrerasAsignadas(data);
-        setCarreraNueva("");
+        // Redirigir a la vista de dashboard o alguna otra vista
+        navigate("/dashboard"); // Ejemplo de redirección
       } else {
         const err = await res.json();
         alert("Error al asignar: " + (err.detail || JSON.stringify(err)));
@@ -114,71 +113,90 @@ function AsignarCarrera() {
   };
 
   return (
-    <div style={containerStyle}>
-      <h2>Asignar Carrera a Usuario</h2>
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={onRequestClose}
+      style={{
+        content: {
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          padding: "0",
+          border: "none",
+          background: "none",
+        },
+        overlay: {
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          zIndex: 999,
+        },
+      }}
+    >
+      <div style={containerStyle}>
+        <h2>Asignar Carrera a Usuario</h2>
 
-      {/* Seleccionar alumno */}
-      <label>Seleccionar Alumno:</label>
-      <select
-        value={alumnoSeleccionado?.id || ""}
-        onChange={(e) => {
-          const id = Number(e.target.value);
-          const alumno = alumnos.find((a) => a.id === id) || null;
-          setAlumnoSeleccionado(alumno);
-        }}
-        style={selectStyle}
-      >
-        <option value="">-- Seleccioná un alumno --</option>
-        {alumnos.map((a) => (
-          <option key={a.id} value={a.id}>
-            {a.userdetail?.firstname} {a.userdetail?.lastname} ({a.username})
-          </option>
-        ))}
-      </select>
+        {/* Seleccionar alumno */}
+        <label>Seleccionar Alumno:</label>
+        <select
+          value={alumnoSeleccionado?.id || ""}
+          onChange={(e) => {
+            const id = Number(e.target.value);
+            const alumno = alumnos.find((a) => a.id === id) || null;
+            setAlumnoSeleccionado(alumno);
+          }}
+          style={selectStyle}
+        >
+          <option value="">-- Seleccioná un alumno --</option>
+          {alumnos.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.userdetail?.firstname} {a.userdetail?.lastname} ({a.username})
+            </option>
+          ))}
+        </select>
 
-      {/* Mostrar carreras asignadas */}
-      {alumnoSeleccionado && (
-        <>
-          <h3>Carreras asignadas a  {alumnoSeleccionado.userdetail?.firstname}:</h3>
-          {carrerasAsignadas.length === 0 ? (
-            <p>No tiene carreras asignadas.</p>
-          ) : (
-            <ul>
-              {carrerasAsignadas.map((c) => (
-                <li key={c.id}>{c.name}</li>
-              ))}
-            </ul>
-          )}
+        {/* Mostrar carreras asignadas */}
+        {alumnoSeleccionado && (
+          <>
+            <h3>Carreras asignadas a {alumnoSeleccionado.userdetail?.firstname}:</h3>
+            {carrerasAsignadas.length === 0 ? (
+              <p>No tiene carreras asignadas.</p>
+            ) : (
+              <ul>
+                {carrerasAsignadas.map((c) => (
+                  <li key={c.id}>{c.name}</li>
+                ))}
+              </ul>
+            )}
 
-          {/* Seleccionar nueva carrera */}
-          <label>Asignar nueva carrera:</label>
-          <select
-            value={carreraNueva}
-            onChange={(e) => setCarreraNueva(Number(e.target.value))}
-            style={selectStyle}
-          >
-            <option value="">-- Seleccioná una carrera --</option>
-            {carreras
-              .filter((c) => !carrerasAsignadas.some((ac) => ac.id === c.id))
-              .map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-          </select>
+            {/* Seleccionar nueva carrera */}
+            <label>Asignar nueva carrera:</label>
+            <select
+              value={carreraNueva}
+              onChange={(e) => setCarreraNueva(Number(e.target.value))}
+              style={selectStyle}
+            >
+              <option value="">-- Seleccioná una carrera --</option>
+              {carreras
+                .filter((c) => !carrerasAsignadas.some((ac) => ac.id === c.id))
+                .map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+            </select>
 
-          <button style={buttonStyle} onClick={handleAsignarCarrera}>
-            Asignar Carrera
-          </button>
-          <button
-            type="button"
-            style={{ ...buttonStyle, width: "60%", maxWidth: "280px" }}
-            onClick={() => navigate("/dashboard")} >
+            <button style={buttonStyle} onClick={handleAsignarCarrera}>
+              Asignar Carrera
+            </button>
+            <button
+              type="button"
+              style={{ ...buttonStyle, width: "60%", maxWidth: "280px" }}
+              onClick={onRequestClose} >
               Cancelar
             </button>
-        </>
-      )}
-    </div>
+          </>
+        )}
+      </div>
+    </Modal>
   );
 }
 

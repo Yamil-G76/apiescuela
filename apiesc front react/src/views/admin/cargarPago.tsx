@@ -26,7 +26,6 @@ function CargarPago() {
 
   const token = localStorage.getItem("token");
 
-  // Traer todos los alumnos
   useEffect(() => {
     if (!token) return;
     fetch("http://127.0.0.1:8000/users/all", {
@@ -37,7 +36,6 @@ function CargarPago() {
       .catch(console.error);
   }, [token]);
 
-  // Traer carreras del alumno seleccionado
   useEffect(() => {
     if (!alumnoSeleccionado || !token) {
       setCarrerasAsignadas([]);
@@ -65,8 +63,7 @@ function CargarPago() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+          Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           id_usuarioxcarrera: idUsuarioCarrera,
           cuota_afectada: cuotaAfectada,
@@ -90,89 +87,136 @@ function CargarPago() {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: "2rem auto" }}>
-      <h2>Cargar Pago</h2>
+    <div style={formWrapper}>
+      <h2 style={formTitle}>Cargar Pago</h2>
 
-      {/* Seleccionar Alumno */}
-      <label>Alumno:</label>
-      <select
-        value={alumnoSeleccionado?.id || ""}
-        onChange={(e) => {
-          const id = Number(e.target.value);
-          const alumno = alumnos.find((a) => a.id === id) || null;
-          setAlumnoSeleccionado(alumno);
-          setIdUsuarioCarrera("");
-          setMonto("");
-        }}
-        style={{ width: "100%", padding: "0.5rem", marginBottom: "1rem" }}
-      >
-        <option value="">-- Seleccionar alumno --</option>
-        {alumnos.map((a) => (
-          <option key={a.id} value={a.id}>
-            {a.userdetail?.firstname} {a.userdetail?.lastname} ({a.username})
-          </option>
-        ))}
-      </select>
-
-      {/* Seleccionar carrera asignada */}
-      {alumnoSeleccionado && (
-        <>
-          <label>Carrera:</label>
+      <div style={formGrid}>
+        <div style={formGroup}>
+          <label>Alumno</label>
           <select
-            value={idUsuarioCarrera === "" ? "" : String(idUsuarioCarrera)}
+            value={alumnoSeleccionado?.id || ""}
             onChange={(e) => {
-              const idUc = parseInt(e.target.value);
-              setIdUsuarioCarrera(idUc);
-              const carrera = carrerasAsignadas.find((c) => c.id_usuarioxcarrera === idUc);
-              setMonto(carrera?.costo_mensual ?? "");
+              const id = Number(e.target.value);
+              const alumno = alumnos.find((a) => a.id === id) || null;
+              setAlumnoSeleccionado(alumno);
+              setIdUsuarioCarrera("");
+              setMonto("");
             }}
-            style={{ width: "100%", padding: "0.5rem", marginBottom: "1rem" }}
+            style={inputStyle}
           >
-            <option value="">-- Seleccionar carrera --</option>
-            {carrerasAsignadas.map((c) => (
-              <option key={c.id_usuarioxcarrera} value={c.id_usuarioxcarrera}>
-                {c.name}
+            <option value="">-- Seleccionar alumno --</option>
+            {alumnos.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.userdetail?.firstname} {a.userdetail?.lastname} ({a.username})
               </option>
             ))}
           </select>
+        </div>
 
-          {/* Campos de pago */}
-          <label>Cuota afectada:</label>
-          <input
-            type="number"
-            value={cuotaAfectada}
-            onChange={(e) =>
-              setCuotaAfectada(e.target.value === "" ? "" : parseInt(e.target.value))
-            }
-            style={{ width: "100%", padding: "0.5rem", marginBottom: "1rem" }}
-          />
+        {alumnoSeleccionado && (
+          <>
+            <div style={formGroup}>
+              <label>Carrera</label>
+              <select
+                value={idUsuarioCarrera === "" ? "" : String(idUsuarioCarrera)}
+                onChange={(e) => {
+                  const idUc = parseInt(e.target.value);
+                  setIdUsuarioCarrera(idUc);
+                  const carrera = carrerasAsignadas.find((c) => c.id_usuarioxcarrera === idUc);
+                  setMonto(carrera?.costo_mensual ?? "");
+                }}
+                style={inputStyle}
+              >
+                <option value="">-- Seleccionar carrera --</option>
+                {carrerasAsignadas.map((c) => (
+                  <option key={c.id_usuarioxcarrera} value={c.id_usuarioxcarrera}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <label>Monto:</label>
-          <input
-            type="number"
-            value={monto}
-            disabled
-            style={{ width: "100%", padding: "0.5rem", marginBottom: "1rem", backgroundColor: "#eee" }}
-          />
+            <div style={formGroup}>
+              <label>Cuota afectada</label>
+              <input
+                type="number"
+                value={cuotaAfectada}
+                onChange={(e) =>
+                  setCuotaAfectada(e.target.value === "" ? "" : parseInt(e.target.value))
+                }
+                style={inputStyle}
+              />
+            </div>
 
-          <button
-            onClick={handleEnviarPago}
-            style={{
-              backgroundColor: "#1976d2",
-              color: "#fff",
-              padding: "0.75rem 1.5rem",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontWeight: 600,
-            }}
-          >
-            Enviar Pago
-          </button>
-        </>
-      )}
+            <div style={formGroup}>
+              <label>Monto</label>
+              <input
+                type="number"
+                value={monto}
+                disabled
+                style={{ ...inputStyle, backgroundColor: "#eee" }}
+              />
+            </div>
+          </>
+        )}
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.5rem" }}>
+        <button style={buttonStyle} onClick={handleEnviarPago}>
+          Enviar Pago
+        </button>
+      </div>
     </div>
   );
 }
+
+// === ESTILOS ===
+
+const formWrapper: React.CSSProperties = {
+  backgroundColor: "#fff",
+  padding: "2rem",
+  borderRadius: "12px",
+  width: "100%",
+  maxWidth: "600px",
+  fontFamily: "'Segoe UI', sans-serif",
+};
+
+const formTitle: React.CSSProperties = {
+  color: "#1565c0",
+  fontWeight: 700,
+  fontSize: "1.5rem",
+  marginBottom: "1.5rem",
+  textAlign: "center",
+};
+
+const formGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: "1rem 1.5rem",
+};
+
+const formGroup: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+};
+
+const inputStyle: React.CSSProperties = {
+  padding: "0.5rem",
+  borderRadius: "6px",
+  border: "1px solid #ccc",
+  fontSize: "1rem",
+  marginTop: "0.3rem",
+};
+
+const buttonStyle: React.CSSProperties = {
+  backgroundColor: "#1565c0",
+  color: "white",
+  padding: "0.75rem 1.5rem",
+  border: "none",
+  borderRadius: "8px",
+  fontWeight: 600,
+  fontSize: "1rem",
+  cursor: "pointer",
+};
 
 export default CargarPago;

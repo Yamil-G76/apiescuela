@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Modal from "react-modal";
+import CrearCarrera from "./AddCarrera"; // Asegúrate de que esté importado el componente CrearCarrera
+import AsignarCarrera from "./asignarCarreras"; // Asegúrate de que esté importado el componente AsignarCarrera
 
 // Tipo de datos que devuelve el backend
 type Career = {
@@ -10,10 +13,12 @@ type Career = {
   inicio_cursado: string;
 };
 
-function VerCarreras() {
+function ListaCarreras() {
   const [carreras, setCarreras] = useState<Career[]>([]);
   const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [modalCrearCarreraAbierto, setModalCrearCarreraAbierto] = useState(false); // Estado para abrir el modal Crear Carrera
+  const [modalAsignarCarreraAbierto, setModalAsignarCarreraAbierto] = useState(false); // Estado para abrir el modal Asignar Carrera
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,18 +55,28 @@ function VerCarreras() {
   return (
     <div style={containerStyle}>
       <div style={cardStyle}>
-        <h2 style={titleStyle}>Listado de Carreras</h2>
+        {/* Título y buscador */}
+        <div style={headerStyle}>
+          <h2 style={titleStyle}>Listado de Carreras</h2>
+          <input
+            type="text"
+            placeholder="Buscar carrera..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={searchStyle}
+            aria-label="Buscar carrera"
+          />
+        </div>
 
-        <input
-          type="text"
-          placeholder="Buscar carrera..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={searchStyle}
-        />
-
+        {/* Mensaje de error */}
         {error && <p style={{ color: "red" }}>{error}</p>}
 
+        {/* Mensaje cuando no se encuentran carreras */}
+        {carrerasFiltradas.length === 0 && !error && (
+          <p style={{ textAlign: "center", color: "#888" }}>No se encontraron carreras.</p>
+        )}
+
+        {/* Tabla de carreras */}
         <table style={tableStyle}>
           <thead>
             <tr style={headerRowStyle}>
@@ -85,10 +100,105 @@ function VerCarreras() {
           </tbody>
         </table>
 
+        {/* Total de carreras */}
         <p style={totalTextStyle}>Total de carreras: {carrerasFiltradas.length}</p>
 
-        <p style={linkStyle} onClick={() => navigate("/dashboard")}>Volver al Dashboard</p>
+        {/* Botones para crear y asignar carrera */}
+        <div style={buttonContainerStyle}>
+          <button
+            onClick={() => setModalCrearCarreraAbierto(true)} // Abre el modal de CrearCarrera
+            style={buttonCrearCarreraStyle}
+          >
+            Crear Carrera
+          </button>
+          <button
+            onClick={() => setModalAsignarCarreraAbierto(true)} // Abre el modal de AsignarCarrera
+            style={buttonCrearCarreraStyle}
+          >
+            Asignar Carrera
+          </button>
+        </div>
       </div>
+
+      {/* Modal para Crear Carrera */}
+      <Modal
+        isOpen={modalCrearCarreraAbierto}
+        onRequestClose={() => setModalCrearCarreraAbierto(false)}
+        style={{
+          content: {
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            padding: "0",
+            border: "none",
+            background: "none",
+          },
+          overlay: {
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 999,
+          },
+        }}
+      >
+        <div style={{ position: "relative", background: "#fff", padding: "2rem", borderRadius: "12px" }}>
+          <button
+            onClick={() => setModalCrearCarreraAbierto(false)}
+            style={{
+              position: "absolute",
+              top: "0.5rem",
+              right: "0.8rem",
+              background: "transparent",
+              border: "none",
+              fontSize: "1.5rem",
+              cursor: "pointer",
+              color: "#999",
+            }}
+          >
+            ×
+          </button>
+
+          <CrearCarrera isOpen={modalCrearCarreraAbierto} onRequestClose={() => setModalCrearCarreraAbierto(false)} />
+        </div>
+      </Modal>
+
+      {/* Modal para Asignar Carrera */}
+      <Modal
+        isOpen={modalAsignarCarreraAbierto}
+        onRequestClose={() => setModalAsignarCarreraAbierto(false)}
+        style={{
+          content: {
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            padding: "0",
+            border: "none",
+            background: "none",
+          },
+          overlay: {
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 999,
+          },
+        }}
+      >
+        <div style={{ position: "relative", background: "#fff", padding: "2rem", borderRadius: "12px" }}>
+          <button
+            onClick={() => setModalAsignarCarreraAbierto(false)}
+            style={{
+              position: "absolute",
+              top: "0.5rem",
+              right: "0.8rem",
+              background: "transparent",
+              border: "none",
+              fontSize: "1.5rem",
+              cursor: "pointer",
+              color: "#999",
+            }}
+          >
+            ×
+          </button>
+
+          <AsignarCarrera isOpen={modalAsignarCarreraAbierto} onRequestClose={() => setModalAsignarCarreraAbierto(false)} />
+        </div>
+      </Modal>
     </div>
   );
 }
@@ -97,8 +207,9 @@ function VerCarreras() {
 const containerStyle: React.CSSProperties = {
   minHeight: "100vh",
   display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
+  flexDirection: "column",
+  alignItems: "flex-start", 
+  justifyContent: "flex-start", 
   background: "linear-gradient(to right, #e9f1f7, #ffffff)",
   padding: "2rem",
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -114,19 +225,26 @@ const cardStyle: React.CSSProperties = {
   border: "1px solid #e0e0e0",
 };
 
+const headerStyle: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "1.5rem",
+  width: "100%",
+};
+
 const titleStyle: React.CSSProperties = {
   color: "#1a237e",
-  textAlign: "center",
-  marginBottom: "1.5rem",
+  textAlign: "left",
+  marginBottom: "0",
 };
 
 const searchStyle: React.CSSProperties = {
-  marginBottom: "1.5rem",
-  width: "100%",
   padding: "0.75rem",
   fontSize: "1rem",
   borderRadius: "6px",
   border: "1px solid #ccc",
+  width: "300px",
 };
 
 const tableStyle: React.CSSProperties = {
@@ -159,12 +277,23 @@ const totalTextStyle: React.CSSProperties = {
   color: "#333",
 };
 
-const linkStyle: React.CSSProperties = {
-  marginTop: "2rem",
-  textAlign: "center",
-  color: "#1976d2",
-  textDecoration: "underline",
+const buttonCrearCarreraStyle: React.CSSProperties = {
+  backgroundColor: "#1976d2",
+  color: "white",
+  padding: "0.75rem 1.5rem",
+  borderRadius: "6px",
   cursor: "pointer",
+  fontWeight: "600",
+  border: "none",
+  marginTop: "1.5rem",
+  display: "block",
+  marginLeft: "auto", 
 };
 
-export default VerCarreras;
+const buttonContainerStyle: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: "1rem", 
+};
+
+export default ListaCarreras;

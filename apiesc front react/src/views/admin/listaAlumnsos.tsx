@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import Modal from "react-modal";
+import Singin from "./singin"; // Asegurate que esta ruta sea correcta
+
+Modal.setAppElement("#root");
 
 type User = {
   id: number;
@@ -16,9 +19,13 @@ function VerAlumnos() {
   const [usuarios, setUsuarios] = useState<User[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
+  const [mostrarModal, setMostrarModal] = useState(false);
 
   useEffect(() => {
+    cargarUsuarios();
+  }, []);
+
+  const cargarUsuarios = () => {
     const token = localStorage.getItem("token");
 
     fetch("http://localhost:8000/users/all", {
@@ -37,9 +44,8 @@ function VerAlumnos() {
         console.error(err);
         setError("No se pudieron cargar los usuarios.");
       });
-  }, []);
+  };
 
-  // Filtro por búsqueda
   const usuariosFiltrados = usuarios.filter((u) => {
     const term = searchTerm.toLowerCase();
     return (
@@ -54,9 +60,19 @@ function VerAlumnos() {
     <div style={containerStyle}>
       <div style={headerStyle}>
         <h2 style={titleStyle}>Lista de Usuarios</h2>
-        <span style={linkStyle} onClick={() => navigate("/dashboard")}>
-          Volver al Dashboard
-        </span>
+        <button
+          onClick={() => setMostrarModal(true)}
+          style={{
+            padding: "0.5rem 1rem",
+            backgroundColor: "#1976d2",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
+          Agregar Alumno
+        </button>
       </div>
 
       <p style={subTextStyle}>Total: {usuariosFiltrados.length} usuarios</p>
@@ -95,6 +111,37 @@ function VerAlumnos() {
           </tbody>
         </table>
       </div>
+
+      <Modal
+        isOpen={mostrarModal}
+        onRequestClose={() => setMostrarModal(false)}
+        style={{
+          content: {
+            top: "50%",
+            left: "50%",
+            right: "auto",
+            bottom: "auto",
+            marginRight: "-50%",
+            transform: "translate(-50%, -50%)",
+            padding: 0,
+            border: "none",
+            background: "transparent", // 👈 corregido para permitir el fondo del modal interno
+            overflow: "visible",
+          },
+          overlay: {
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 999,
+          },
+        }}
+      >
+        <Singin
+          onSuccess={() => {
+            setMostrarModal(false);
+            cargarUsuarios();
+          }}
+          onClose={() => setMostrarModal(false)}
+        />
+      </Modal>
     </div>
   );
 }
@@ -120,13 +167,6 @@ const titleStyle: React.CSSProperties = {
   fontWeight: "bold",
   color: "#1a237e",
   marginBottom: "0.5rem",
-};
-
-const linkStyle: React.CSSProperties = {
-  color: "#1976d2",
-  cursor: "pointer",
-  fontSize: "1rem",
-  textDecoration: "underline",
 };
 
 const subTextStyle: React.CSSProperties = {

@@ -1,8 +1,14 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaUser, FaMoneyBill, FaGraduationCap } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaUser, FaMoneyBill, FaGraduationCap, FaSignOutAlt } from "react-icons/fa";
+import VerAlumnos from "./listaAlumnsos";
+import VerPagos from "./VerPagos";
+import CargarPago from "./cargarPago";
+import Modal from "react-modal";
+import ListaCarreras from "./listaCarreras"; // Importamos ListaCarreras.tsx
 
-// === Tipo para los datos que retorna el backend ===
+// Seteo global para accesibilidad del modal
+Modal.setAppElement("#root");
+
 type UserData = {
   usuario: string;
   firstname: string;
@@ -13,8 +19,8 @@ type UserData = {
 
 function DashboardAdmin() {
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const [seccionActiva, setSeccionActiva] = useState("inicio");
+  const [modalPagoAbierto, setModalPagoAbierto] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -34,104 +40,84 @@ function DashboardAdmin() {
       .catch((err) => {
         console.error("Error al obtener datos del usuario:", err);
         localStorage.removeItem("token");
-        navigate("/login");
+        window.location.href = "/login";
       });
-  }, [navigate]);
+  }, []);
 
   function logout() {
     localStorage.removeItem("token");
-    navigate("/login");
+    window.location.href = "/login";
   }
 
   if (!userData) return <p style={{ padding: "2rem" }}>Cargando...</p>;
 
-  const firstname = userData.firstname;
-  const username = userData.usuario;
-
   return (
     <div style={dashboardWrapper}>
-      {/* === Menú lateral izquierdo === */}
+      {/* === Sidebar === */}
       <aside style={sidebarStyle}>
         <div style={logoStyle}>ISMM</div>
-        <nav style={navStyle}>
-          <div
-            style={getNavItemStyle(hoveredItem === "agregar")}
-            onMouseEnter={() => setHoveredItem("agregar")}
-            onMouseLeave={() => setHoveredItem(null)}
-            onClick={() => navigate("/singin")}
-          >
-            <FaUser style={iconStyle} /> Agregar Alumno
-          </div>
-          <div
-            style={getNavItemStyle(hoveredItem === "verAlumnos")}
-            onMouseEnter={() => setHoveredItem("verAlumnos")}
-            onMouseLeave={() => setHoveredItem(null)}
-            onClick={() => navigate("/admin/alumnos/lista")}
-          >
-            <FaGraduationCap style={iconStyle} /> Ver Alumnos
-          </div>
-          <div
-            style={getNavItemStyle(hoveredItem === "agregarCarrera")}
-            onMouseEnter={() => setHoveredItem("agregarCarrera")}
-            onMouseLeave={() => setHoveredItem(null)}
-            onClick={() => navigate("/admin/carrera/nueva")}
-          >
-            <FaGraduationCap style={iconStyle} /> Agregar Carreras
-          </div>
-          <div
-            style={getNavItemStyle(hoveredItem === "verCarreras")}
-            onMouseEnter={() => setHoveredItem("verCarreras")}
-            onMouseLeave={() => setHoveredItem(null)}
-            onClick={() => navigate("/admin/carrera/lista")}
-          >
-            <FaGraduationCap style={iconStyle} /> Ver Carreras
-          </div>
-          <div
-            style={getNavItemStyle(hoveredItem === "asignarCarreras")}
-            onMouseEnter={() => setHoveredItem("asignarCarreras")}
-            onMouseLeave={() => setHoveredItem(null)}
-            onClick={() => navigate("/admin/carrera/asignar")}
-          >
-            <FaGraduationCap style={iconStyle} /> Asignar Carreras
-          </div>
-          <div
-            style={getNavItemStyle(hoveredItem === "cargarPagos")}
-            onMouseEnter={() => setHoveredItem("cargarPagos")}
-            onMouseLeave={() => setHoveredItem(null)}
-            onClick={() => navigate("/admin/cargar/pago")}
-          >
-            <FaMoneyBill style={iconStyle} /> Cargar Pagos
-          </div>
-          <div
-            style={getNavItemStyle(hoveredItem === "verPagos")}
-            onMouseEnter={() => setHoveredItem("verPagos")}
-            onMouseLeave={() => setHoveredItem(null)}
-            onClick={() => navigate("/admin/ver/pago")}
-          >
-            <FaMoneyBill style={iconStyle} /> Ver Pagos
-          </div>
-        </nav>
+        <div style={iconContainer}>
+          <FaUser
+            title="Alumnos"
+            style={iconStyle}
+            onClick={() => setSeccionActiva("alumnos")}
+          />
+          <FaGraduationCap
+            title="Carreras"
+            style={iconStyle}
+            onClick={() => setSeccionActiva("carreras")}
+          />
+          <FaMoneyBill
+            title="Pagos"
+            style={iconStyle}
+            onClick={() => setSeccionActiva("pagos")}
+          />
+          <FaSignOutAlt
+            title="Cerrar sesión"
+            style={iconStyle}
+            onClick={logout}
+          />
+        </div>
       </aside>
 
-      {/* === Área principal === */}
+      {/* === Contenido dinámico === */}
       <main style={mainContentStyle}>
-        <div style={topBarStyle}>
-          <span style={logoutStyle} onClick={logout}>
-            Cerrar sesión
-          </span>
-        </div>
+        {seccionActiva === "inicio" && (
+          <div>
+            <h2 style={welcomeText}>Bienvenido {userData.firstname}</h2>
+            <p>Seleccioná una opción del menú para comenzar.</p>
+          </div>
+        )}
 
-        <div style={welcomeBoxStyle}>
-          <h2 style={welcomeText}>Bienvenido Al Dashboard Administrativo {username} {firstname}</h2>
-          <p style={subtext}>Seleccioná una opción del menú para comenzar.</p>
-        </div>
+        {seccionActiva === "alumnos" && <VerAlumnos />}
+
+        {/* Sección Carreras */}
+        {seccionActiva === "carreras" && (
+          <div>
+            <ListaCarreras /> {/* Los botones de Crear y Asignar carrera están dentro de ListaCarreras */}
+          </div>
+        )}
+
+        {seccionActiva === "pagos" && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }}>
+              <button
+                onClick={() => setModalPagoAbierto(true)}
+                style={buttonCargarPago}
+              >
+                Cargar Pago
+              </button>
+            </div>
+
+            <VerPagos />
+          </div>
+        )}
       </main>
     </div>
   );
 }
 
-// === ESTILOS ===
-
+// === Estilos ===
 const dashboardWrapper: React.CSSProperties = {
   display: "flex",
   height: "100vh",
@@ -139,66 +125,38 @@ const dashboardWrapper: React.CSSProperties = {
 };
 
 const sidebarStyle: React.CSSProperties = {
-  width: "220px",
+  width: "80px",
   background: "linear-gradient(to bottom, #1565c0, #1e88e5)",
   color: "white",
   display: "flex",
   flexDirection: "column",
-  padding: "1.5rem 1rem",
+  alignItems: "center",
+  padding: "1rem 0",
+  gap: "2rem",
 };
 
 const logoStyle: React.CSSProperties = {
-  fontSize: "1.2rem",
   fontWeight: "bold",
-  marginBottom: "2rem",
-  textAlign: "center",
+  fontSize: "1rem",
+  marginBottom: "1rem",
 };
 
-const navStyle: React.CSSProperties = {
+const iconContainer: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
-  gap: "1rem",
+  gap: "1.5rem",
 };
 
-const getNavItemStyle = (isHovered: boolean): React.CSSProperties => ({
-  display: "flex",
-  alignItems: "center",
-  gap: "0.5rem",
-  fontSize: "1rem",
-  cursor: "pointer",
-  padding: "0.5rem 0.75rem",
-  borderRadius: "6px",
-  backgroundColor: isHovered ? "rgba(255,255,255,0.2)" : "transparent",
-  transition: "background-color 0.2s ease",
-});
-
 const iconStyle: React.CSSProperties = {
-  fontSize: "1.1rem",
+  fontSize: "1.4rem",
+  cursor: "pointer",
 };
 
 const mainContentStyle: React.CSSProperties = {
   flexGrow: 1,
   backgroundColor: "#f5f5f5",
   padding: "2rem",
-  position: "relative",
-};
-
-const topBarStyle: React.CSSProperties = {
-  position: "absolute",
-  top: "1rem",
-  right: "2rem",
-};
-
-const logoutStyle: React.CSSProperties = {
-  color: "#1565c0",
-  fontWeight: 600,
-  cursor: "pointer",
-  textDecoration: "underline",
-};
-
-const welcomeBoxStyle: React.CSSProperties = {
-  marginTop: "4rem",
-  textAlign: "center",
+  overflowY: "auto",
 };
 
 const welcomeText: React.CSSProperties = {
@@ -207,9 +165,14 @@ const welcomeText: React.CSSProperties = {
   color: "#333",
 };
 
-const subtext: React.CSSProperties = {
-  marginTop: "1rem",
-  color: "#555",
+const buttonCargarPago: React.CSSProperties = {
+  padding: "0.5rem 1rem",
+  backgroundColor: "#1976d2",
+  color: "white",
+  border: "none",
+  borderRadius: "6px",
+  cursor: "pointer",
+  fontWeight: 600,
 };
 
 export default DashboardAdmin;

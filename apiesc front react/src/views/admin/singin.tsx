@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Singin() {
+function Singin({ onSuccess, onClose }: { onSuccess?: () => void; onClose?: () => void }) {
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
@@ -34,7 +34,7 @@ function Singin() {
       firstname,
       lastname,
       email,
-      type: 2, // tipo alumno
+      type: 2,
     };
 
     try {
@@ -42,17 +42,17 @@ function Singin() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(nuevoUsuario),
       });
 
       if (response.ok) {
         alert("Usuario creado con éxito");
-        navigate("/dashboard");
+        onSuccess?.();
       } else {
         const errorData = await response.json();
-        alert("Error al crear usuario: " + (errorData.detail || errorData));
+        alert("Error: " + (errorData.detail || "No se pudo crear el usuario"));
       }
     } catch (err) {
       console.error("Error de red:", err);
@@ -61,131 +61,124 @@ function Singin() {
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <h2 style={titleStyle}>Crear cuenta</h2>
+    <div style={modalStyle}>
+      <button style={closeButtonStyle} onClick={onClose}>×</button>
 
-        <form onSubmit={handleSubmit}>
-          <div style={inputGroupStyle}>
-            <label style={labelStyle}>Nombre de usuario</label>
-            <input type="text" style={inputStyle} value={username} onChange={(e) => setUsername(e.target.value)} />
-          </div>
+      <h2 style={titleStyle}>Crear cuenta</h2>
 
+      <form onSubmit={handleSubmit}>
+        <div style={rowStyle}>
           <div style={inputGroupStyle}>
             <label style={labelStyle}>Nombre</label>
             <input type="text" style={inputStyle} value={firstname} onChange={(e) => setFirstname(e.target.value)} />
           </div>
-
           <div style={inputGroupStyle}>
             <label style={labelStyle}>Apellido</label>
             <input type="text" style={inputStyle} value={lastname} onChange={(e) => setLastname(e.target.value)} />
           </div>
+        </div>
 
+        <div style={rowStyle}>
           <div style={inputGroupStyle}>
             <label style={labelStyle}>Email</label>
             <input type="email" style={inputStyle} value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
+          <div style={inputGroupStyle}>
+            <label style={labelStyle}>Usuario</label>
+            <input type="text" style={inputStyle} value={username} onChange={(e) => setUsername(e.target.value)} />
+          </div>
+        </div>
 
+        <div style={rowStyle}>
           <div style={inputGroupStyle}>
             <label style={labelStyle}>Contraseña</label>
             <input type="password" style={inputStyle} value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
-
           <div style={inputGroupStyle}>
             <label style={labelStyle}>Repetir contraseña</label>
             <input type="password" style={inputStyle} value={repassword} onChange={(e) => setRepassword(e.target.value)} />
           </div>
+        </div>
 
-          <div style={inputGroupStyle}>
-            <label style={labelStyle}>DNI</label>
-            <input type="text" style={inputStyle} value={dni} onChange={(e) => setDni(e.target.value)} />
-          </div>
+        <div style={inputGroupStyle}>
+          <label style={labelStyle}>DNI</label>
+          <input type="text" style={inputStyle} value={dni} onChange={(e) => setDni(e.target.value)} />
+        </div>
 
-          <div style={{ display: "flex", justifyContent: "center", gap: "1rem" }}>
-            <button
-              type="submit"
-              style={{ ...buttonStyle, width: "60%", maxWidth: "280px" }}
-              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#1565c0")}
-              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#1976d2")}
-            >
-              Crear cuenta
-            </button>
-            <button
-              type="button"
-              style={{ ...buttonStyle, width: "60%", maxWidth: "280px" }}
-              onClick={() => navigate("/dashboard")}
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
-      </div>
+        <div style={{ textAlign: "right" }}>
+          <button type="submit" style={buttonStyle}>Crear cuenta</button>
+        </div>
+      </form>
     </div>
   );
 }
 
-// === Estilos ===
+// === ESTILOS ===
 
-const containerStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  background: "linear-gradient(to right, #e9f1f7, #ffffff)",
-  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+const modalStyle: React.CSSProperties = {
+  position: "relative",
+  backgroundColor: "#fff",
+  borderRadius: "10px",
   padding: "2rem",
+  width: "90%",
+  maxWidth: "600px",
+  boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+  maxHeight: "90vh",
+  overflowY: "auto",
+  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
 };
 
-const cardStyle: React.CSSProperties = {
-  maxWidth: "500px",
-  width: "100%",
-  backgroundColor: "#ffffff",
-  borderRadius: "12px",
-  padding: "2rem",
-  boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)",
-  border: "1px solid #e0e0e0",
-  color: "#333333",
+const closeButtonStyle: React.CSSProperties = {
+  position: "absolute",
+  top: "10px",
+  right: "15px",
+  background: "none",
+  border: "none",
+  fontSize: "1.5rem",
+  cursor: "pointer",
+  color: "#555",
 };
 
 const titleStyle: React.CSSProperties = {
-  color: "#1a237e",
   textAlign: "center",
-  marginBottom: "1.5rem",
+  color: "#1a237e",
+  marginBottom: "1rem",
+};
+
+const rowStyle: React.CSSProperties = {
+  display: "flex",
+  gap: "1rem",
+  flexWrap: "wrap",
 };
 
 const inputGroupStyle: React.CSSProperties = {
+  flex: 1,
   display: "flex",
   flexDirection: "column",
-  marginBottom: "1.2rem",
+  marginBottom: "1rem",
+  minWidth: "200px",
 };
 
 const labelStyle: React.CSSProperties = {
-  fontWeight: "600",
-  color: "#333333",
-  marginBottom: "0.5rem",
+  fontWeight: "bold",
+  marginBottom: "0.3rem",
 };
 
 const inputStyle: React.CSSProperties = {
+  padding: "0.5rem",
+  fontSize: "1rem",
   borderRadius: "6px",
   border: "1px solid #ccc",
-  backgroundColor: "#f9f9f9",
-  color: "#333",
-  padding: "0.75rem",
-  fontSize: "1rem",
-  transition: "border-color 0.3s",
 };
 
 const buttonStyle: React.CSSProperties = {
   backgroundColor: "#1976d2",
+  color: "white",
   border: "none",
-  color: "#ffffff",
-  fontWeight: "600",
-  padding: "0.75rem",
+  padding: "0.75rem 1.5rem",
   borderRadius: "6px",
-  fontSize: "1rem",
-  marginTop: "0.75rem",
+  fontWeight: "bold",
   cursor: "pointer",
-  transition: "background-color 0.3s ease",
 };
 
 export default Singin;

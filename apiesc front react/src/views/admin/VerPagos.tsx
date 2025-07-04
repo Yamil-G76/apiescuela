@@ -53,7 +53,7 @@ function VerPagos() {
       .then((res) => res.json())
       .then((data: RelacionCarrera[]) => {
         setRelacionesCarreras(data);
-        setPagosPorCarrera({}); // Resetear pagos anteriores
+        setPagosPorCarrera({});
         data.forEach((rel) => {
           fetch(`http://127.0.0.1:8000/payments/byrelacion/${rel.id_usuarioxcarrera}`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -72,42 +72,37 @@ function VerPagos() {
   }, [alumnoSeleccionado, token]);
 
   return (
-    <div style={{ maxWidth: 800, margin: "2rem auto", fontFamily: "sans-serif" }}>
-      <h2>Ver Pagos</h2>
+    <div style={wrapper}>
+      <div style={header}>
+        <h2 style={titulo}>Gestión de Pagos</h2>
+      </div>
 
-      <label>Seleccionar Alumno:</label>
-      <select
-        value={alumnoSeleccionado?.id || ""}
-        onChange={(e) => {
-          const id = Number(e.target.value);
-          const alumno = alumnos.find((a) => a.id === id) || null;
-          setAlumnoSeleccionado(alumno);
-          setCarreraExpandida(null);
-        }}
-        style={{ width: "100%", padding: "0.5rem", marginBottom: "1.5rem" }}
-      >
-        <option value="">-- Seleccionar alumno --</option>
-        {alumnos.map((a) => (
-          <option key={a.id} value={a.id}>
-            {a.userdetail?.firstname} {a.userdetail?.lastname} ({a.username})
-          </option>
-        ))}
-      </select>
+      <div style={{ marginBottom: "1.5rem" }}>
+        <label style={labelStyle}>Seleccionar Alumno:</label>
+        <select
+          value={alumnoSeleccionado?.id || ""}
+          onChange={(e) => {
+            const id = Number(e.target.value);
+            const alumno = alumnos.find((a) => a.id === id) || null;
+            setAlumnoSeleccionado(alumno);
+            setCarreraExpandida(null);
+          }}
+          style={selectStyle}
+        >
+          <option value="">-- Seleccionar alumno --</option>
+          {alumnos.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.userdetail?.firstname} {a.userdetail?.lastname} ({a.username})
+            </option>
+          ))}
+        </select>
+      </div>
 
       {relacionesCarreras.length > 0 &&
         relacionesCarreras.map((rel) => (
-          <div
-            key={rel.id_usuarioxcarrera}
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "6px",
-              marginBottom: "1rem",
-              padding: "1rem",
-              backgroundColor: "#f9f9f9",
-            }}
-          >
+          <div key={rel.id_usuarioxcarrera} style={cardStyle}>
             <div
-              style={{ cursor: "pointer", fontWeight: "bold", fontSize: "1.1rem" }}
+              style={cardHeaderStyle}
               onClick={() =>
                 setCarreraExpandida((prev) =>
                   prev === rel.id_usuarioxcarrera ? null : rel.id_usuarioxcarrera
@@ -122,7 +117,7 @@ function VerPagos() {
                 {pagosPorCarrera[rel.id_usuarioxcarrera]?.length > 0 ? (
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead>
-                      <tr style={{ backgroundColor: "#ddd" }}>
+                      <tr style={{ backgroundColor: "#e3f2fd" }}>
                         <th style={tdStyle}>ID</th>
                         <th style={tdStyle}>Monto</th>
                         <th style={tdStyle}>Cuota</th>
@@ -143,7 +138,9 @@ function VerPagos() {
                     </tbody>
                   </table>
                 ) : (
-                  <p>No hay pagos registrados para esta carrera.</p>
+                  <p style={{ marginTop: "0.5rem", fontStyle: "italic", color: "#777" }}>
+                    No hay pagos registrados para esta carrera.
+                  </p>
                 )}
               </div>
             )}
@@ -152,6 +149,59 @@ function VerPagos() {
     </div>
   );
 }
+
+// === ESTILOS ===
+const wrapper: React.CSSProperties = {
+  maxWidth: "850px",
+  margin: "2rem auto",
+  padding: "2rem",
+  backgroundColor: "#fff",
+  borderRadius: "10px",
+  boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+  fontFamily: "'Segoe UI', sans-serif",
+};
+
+const header: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "1.5rem",
+};
+
+const titulo: React.CSSProperties = {
+  fontSize: "1.8rem",
+  fontWeight: 700,
+  color: "#1565c0",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontWeight: 600,
+  marginBottom: "0.3rem",
+};
+
+const selectStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "0.6rem",
+  fontSize: "1rem",
+  borderRadius: "6px",
+  border: "1px solid #ccc",
+};
+
+const cardStyle: React.CSSProperties = {
+  border: "1px solid #ccc",
+  borderRadius: "6px",
+  marginBottom: "1rem",
+  padding: "1rem",
+  backgroundColor: "#f9f9f9",
+};
+
+const cardHeaderStyle: React.CSSProperties = {
+  cursor: "pointer",
+  fontWeight: "bold",
+  fontSize: "1.1rem",
+  color: "#1976d2",
+};
 
 const tdStyle: React.CSSProperties = {
   padding: "0.5rem",

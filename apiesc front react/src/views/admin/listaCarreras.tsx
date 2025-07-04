@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
-import CrearCarrera from "./AddCarrera"; // Asegúrate de que esté importado el componente CrearCarrera
-import AsignarCarrera from "./asignarCarreras"; // Asegúrate de que esté importado el componente AsignarCarrera
+import CrearCarrera from "./AddCarrera";
 
-// Tipo de datos que devuelve el backend
 type Career = {
   id: number;
   name: string;
@@ -17,8 +15,7 @@ function ListaCarreras() {
   const [carreras, setCarreras] = useState<Career[]>([]);
   const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [modalCrearCarreraAbierto, setModalCrearCarreraAbierto] = useState(false); // Estado para abrir el modal Crear Carrera
-  const [modalAsignarCarreraAbierto, setModalAsignarCarreraAbierto] = useState(false); // Estado para abrir el modal Asignar Carrera
+  const [modalCrearCarreraAbierto, setModalCrearCarreraAbierto] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -103,114 +100,41 @@ function ListaCarreras() {
         {/* Total de carreras */}
         <p style={totalTextStyle}>Total de carreras: {carrerasFiltradas.length}</p>
 
-        {/* Botones para crear y asignar carrera */}
+        {/* Botón para crear carrera */}
         <div style={buttonContainerStyle}>
           <button
-            onClick={() => setModalCrearCarreraAbierto(true)} // Abre el modal de CrearCarrera
+            onClick={() => setModalCrearCarreraAbierto(true)}
             style={buttonCrearCarreraStyle}
           >
             Crear Carrera
           </button>
-          <button
-            onClick={() => setModalAsignarCarreraAbierto(true)} // Abre el modal de AsignarCarrera
-            style={buttonCrearCarreraStyle}
-          >
-            Asignar Carrera
-          </button>
         </div>
       </div>
 
-      {/* Modal para Crear Carrera */}
+      {/* Modal: Crear Carrera */}
       <Modal
         isOpen={modalCrearCarreraAbierto}
         onRequestClose={() => setModalCrearCarreraAbierto(false)}
-        style={{
-          content: {
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            padding: "0",
-            border: "none",
-            background: "none",
-          },
-          overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 999,
-          },
-        }}
+        style={modalCrearCarreraStyle}
       >
-        <div style={{ position: "relative", background: "#fff", padding: "2rem", borderRadius: "12px" }}>
-          <button
-            onClick={() => setModalCrearCarreraAbierto(false)}
-            style={{
-              position: "absolute",
-              top: "0.5rem",
-              right: "0.8rem",
-              background: "transparent",
-              border: "none",
-              fontSize: "1.5rem",
-              cursor: "pointer",
-              color: "#999",
-            }}
-          >
-            ×
-          </button>
-
-          <CrearCarrera isOpen={modalCrearCarreraAbierto} onRequestClose={() => setModalCrearCarreraAbierto(false)} />
-        </div>
-      </Modal>
-
-      {/* Modal para Asignar Carrera */}
-      <Modal
-        isOpen={modalAsignarCarreraAbierto}
-        onRequestClose={() => setModalAsignarCarreraAbierto(false)}
-        style={{
-          content: {
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            padding: "0",
-            border: "none",
-            background: "none",
-          },
-          overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 999,
-          },
-        }}
-      >
-        <div style={{ position: "relative", background: "#fff", padding: "2rem", borderRadius: "12px" }}>
-          <button
-            onClick={() => setModalAsignarCarreraAbierto(false)}
-            style={{
-              position: "absolute",
-              top: "0.5rem",
-              right: "0.8rem",
-              background: "transparent",
-              border: "none",
-              fontSize: "1.5rem",
-              cursor: "pointer",
-              color: "#999",
-            }}
-          >
-            ×
-          </button>
-
-          <AsignarCarrera isOpen={modalAsignarCarreraAbierto} onRequestClose={() => setModalAsignarCarreraAbierto(false)} />
-        </div>
+        <CrearCarrera
+          isOpen={modalCrearCarreraAbierto}
+          onRequestClose={() => setModalCrearCarreraAbierto(false)}
+        />
       </Modal>
     </div>
   );
 }
 
 // === Estilos ===
+
 const containerStyle: React.CSSProperties = {
   minHeight: "100vh",
   display: "flex",
   flexDirection: "column",
-  alignItems: "flex-start", 
-  justifyContent: "flex-start", 
-  background: "linear-gradient(to right, #e9f1f7, #ffffff)",
+  alignItems: "flex-start",
+  justifyContent: "flex-start",
+  background: "#f9f9f9",
   padding: "2rem",
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
 };
@@ -286,14 +210,30 @@ const buttonCrearCarreraStyle: React.CSSProperties = {
   fontWeight: "600",
   border: "none",
   marginTop: "1.5rem",
-  display: "block",
-  marginLeft: "auto", 
 };
 
 const buttonContainerStyle: React.CSSProperties = {
   display: "flex",
   justifyContent: "flex-end",
-  gap: "1rem", 
+};
+
+const modalCrearCarreraStyle: Modal.Styles = {
+  content: {
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    padding: "2rem",
+    borderRadius: "12px",
+    background: "#fff",
+    width: "90%",
+    maxWidth: "600px",
+    height: "520px", // altura uniforme con otros modales
+    overflow: "hidden",
+  },
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 999,
+  },
 };
 
 export default ListaCarreras;

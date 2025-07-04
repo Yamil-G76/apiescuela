@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 
-// Tipo de datos
 type Alumno = {
   id: number;
   username: string;
@@ -23,27 +21,13 @@ type Carrera = {
 interface AsignarCarreraProps {
   isOpen: boolean;
   onRequestClose: () => void;
+  alumno?: Alumno | null;
 }
 
-function AsignarCarrera({ isOpen, onRequestClose }: AsignarCarreraProps) {
-  const navigate = useNavigate(); // Redirección
-  const [alumnos, setAlumnos] = useState<Alumno[]>([]);
+function AsignarCarrera({ isOpen, onRequestClose, alumno }: AsignarCarreraProps) {
   const [carreras, setCarreras] = useState<Carrera[]>([]);
-  const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<Alumno | null>(null);
   const [carrerasAsignadas, setCarrerasAsignadas] = useState<Carrera[]>([]);
   const [carreraNueva, setCarreraNueva] = useState<number | "">("");
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    fetch("http://127.0.0.1:8000/users/all", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then(setAlumnos)
-      .catch(console.error);
-  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -58,24 +42,25 @@ function AsignarCarrera({ isOpen, onRequestClose }: AsignarCarreraProps) {
   }, []);
 
   useEffect(() => {
-    if (!alumnoSeleccionado) {
+    if (!alumno) {
       setCarrerasAsignadas([]);
       return;
     }
+
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch(`http://127.0.0.1:8000/usuario/carrera/${alumnoSeleccionado.id}`, {
+    fetch(`http://127.0.0.1:8000/usuario/carrera/${alumno.id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
       .then(setCarrerasAsignadas)
       .catch(console.error);
-  }, [alumnoSeleccionado]);
+  }, [alumno]);
 
   const handleAsignarCarrera = async () => {
-    if (!alumnoSeleccionado || carreraNueva === "") {
-      alert("Seleccioná alumno y carrera");
+    if (!alumno || carreraNueva === "") {
+      alert("Seleccioná una carrera");
       return;
     }
 
@@ -93,22 +78,21 @@ function AsignarCarrera({ isOpen, onRequestClose }: AsignarCarreraProps) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          id_user: alumnoSeleccionado.id,
+          id_user: alumno.id,
           id_carrera: carreraNueva,
         }),
       });
 
       if (res.ok) {
         alert("Carrera asignada con éxito");
-        // Redirigir a la vista de dashboard o alguna otra vista
-        navigate("/dashboard"); // Ejemplo de redirección
+        onRequestClose();
       } else {
         const err = await res.json();
         alert("Error al asignar: " + (err.detail || JSON.stringify(err)));
       }
     } catch (error) {
       console.error(error);
-      alert("Error de red al asignar carrera");
+      alert("Error de red");
     }
   };
 
@@ -116,110 +100,126 @@ function AsignarCarrera({ isOpen, onRequestClose }: AsignarCarreraProps) {
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
-      style={{
-        content: {
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          padding: "0",
-          border: "none",
-          background: "none",
-        },
-        overlay: {
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          zIndex: 999,
-        },
-      }}
+      style={modalStyle}
     >
       <div style={containerStyle}>
-        <h2>Asignar Carrera a Usuario</h2>
+        <h2>Asignar Carrera a {alumno?.userdetail?.firstname}</h2>
 
-        {/* Seleccionar alumno */}
-        <label>Seleccionar Alumno:</label>
-        <select
-          value={alumnoSeleccionado?.id || ""}
-          onChange={(e) => {
-            const id = Number(e.target.value);
-            const alumno = alumnos.find((a) => a.id === id) || null;
-            setAlumnoSeleccionado(alumno);
-          }}
-          style={selectStyle}
-        >
-          <option value="">-- Seleccioná un alumno --</option>
-          {alumnos.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.userdetail?.firstname} {a.userdetail?.lastname} ({a.username})
-            </option>
-          ))}
-        </select>
+        <div style={scrollableContent}>
+          {alumno && (
+            <>
+              <h3>Carreras asignadas:</h3>
+              {carrerasAsignadas.length === 0 ? (
+                <p>No tiene carreras asignadas.</p>
+              ) : (
+                <ul style={listaCarrerasAsignadasStyle}>
+                  {carrerasAsignadas.map((c) => (
+                    <li key={c.id}>{c.name}</li>
+                  ))}
+                </ul>
+              )}
 
-        {/* Mostrar carreras asignadas */}
-        {alumnoSeleccionado && (
-          <>
-            <h3>Carreras asignadas a {alumnoSeleccionado.userdetail?.firstname}:</h3>
-            {carrerasAsignadas.length === 0 ? (
-              <p>No tiene carreras asignadas.</p>
-            ) : (
-              <ul>
-                {carrerasAsignadas.map((c) => (
-                  <li key={c.id}>{c.name}</li>
-                ))}
-              </ul>
-            )}
+              <label>Nueva carrera:</label>
+              <select
+                value={carreraNueva}
+                onChange={(e) => setCarreraNueva(Number(e.target.value))}
+                style={selectStyle}
+              >
+                <option value="">-- Seleccioná una carrera --</option>
+                {carreras
+                  .filter((c) => !carrerasAsignadas.some((ac) => ac.id === c.id))
+                  .map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+              </select>
+            </>
+          )}
+        </div>
 
-            {/* Seleccionar nueva carrera */}
-            <label>Asignar nueva carrera:</label>
-            <select
-              value={carreraNueva}
-              onChange={(e) => setCarreraNueva(Number(e.target.value))}
-              style={selectStyle}
-            >
-              <option value="">-- Seleccioná una carrera --</option>
-              {carreras
-                .filter((c) => !carrerasAsignadas.some((ac) => ac.id === c.id))
-                .map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-            </select>
-
-            <button style={buttonStyle} onClick={handleAsignarCarrera}>
-              Asignar Carrera
-            </button>
-            <button
-              type="button"
-              style={{ ...buttonStyle, width: "60%", maxWidth: "280px" }}
-              onClick={onRequestClose} >
-              Cancelar
-            </button>
-          </>
-        )}
+        <div style={buttonRow}>
+          <button style={buttonStyle} onClick={handleAsignarCarrera}>
+            Asignar
+          </button>
+          <button
+            style={{ ...buttonStyle, backgroundColor: "#ccc", color: "#333" }}
+            onClick={onRequestClose}
+          >
+            Cancelar
+          </button>
+        </div>
       </div>
     </Modal>
   );
 }
 
-// === Estilos ===
+// === ESTILOS ===
+
+const modalStyle: Modal.Styles = {
+  content: {
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    padding: "2rem",
+    borderRadius: "12px",
+    background: "#fff",
+    width: "90%",
+    maxWidth: "500px",
+    height: "420px",
+    overflow: "hidden",
+  },
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 999,
+  },
+};
+
 const containerStyle: React.CSSProperties = {
-  maxWidth: "600px",
-  margin: "2rem auto",
+  display: "flex",
+  flexDirection: "column",
+  height: "100%",
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+};
+
+const scrollableContent: React.CSSProperties = {
+  flex: 1,
+  marginTop: "1rem",
+  paddingRight: "0.5rem",
+  display: "flex",
+  flexDirection: "column",
+};
+
+const listaCarrerasAsignadasStyle: React.CSSProperties = {
+  flexShrink: 0,
+  maxHeight: "140px",
+  overflowY: "auto",
+  marginBottom: "1rem",
+  paddingLeft: "1rem", // solo indentado básico
+  listStyle: "disc",
 };
 
 const selectStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.5rem",
+  marginTop: "0.5rem",
   marginBottom: "1rem",
   borderRadius: "6px",
   border: "1px solid #ccc",
   fontSize: "1rem",
 };
 
+const buttonRow: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: "1rem",
+  marginTop: "1rem",
+};
+
 const buttonStyle: React.CSSProperties = {
   backgroundColor: "#1976d2",
   color: "#fff",
-  padding: "0.75rem 1.5rem",
+  padding: "0.6rem 1.2rem",
   border: "none",
   borderRadius: "6px",
   cursor: "pointer",

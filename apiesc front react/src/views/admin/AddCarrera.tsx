@@ -1,12 +1,12 @@
-// CrearCarrera.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Modal from "react-modal";
 
-// Seteo global para accesibilidad del modal
-Modal.setAppElement("#root");
+interface CrearCarreraProps {
+  isOpen: boolean;
+  onRequestClose: () => void;
+}
 
-function CrearCarrera({ isOpen, onRequestClose }: { isOpen: boolean, onRequestClose: () => void }) {
+function CrearCarrera({ onRequestClose }: CrearCarreraProps) {
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -43,7 +43,7 @@ function CrearCarrera({ isOpen, onRequestClose }: { isOpen: boolean, onRequestCl
 
       if (response.ok) {
         alert("Carrera creada con éxito");
-        navigate("/dashboard");
+        onRequestClose(); // Cierra el modal directamente
       } else {
         const errorData = await response.json();
         alert("Error al crear carrera: " + (errorData.detail || errorData));
@@ -55,110 +55,82 @@ function CrearCarrera({ isOpen, onRequestClose }: { isOpen: boolean, onRequestCl
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onRequestClose={onRequestClose}
-      style={{
-        content: {
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          padding: "0",
-          border: "none",
-          background: "none",
-        },
-        overlay: {
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          zIndex: 999,
-        },
-      }}
-    >
-      <div style={containerStyle}>
-        <div style={cardStyle}>
-          <h2 style={titleStyle}>Crear Nueva Carrera</h2>
+    <div style={cardStyle}>
+      <h2 style={titleStyle}>Crear Nueva Carrera</h2>
 
-          <form onSubmit={handleSubmit}>
-            <div style={inputGroupStyle}>
-              <label style={labelStyle}>Nombre de la carrera</label>
-              <input
-                type="text"
-                style={inputStyle}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-
-            <div style={inputGroupStyle}>
-              <label style={labelStyle}>Costo mensual</label>
-              <input
-                type="number"
-                style={{ ...inputStyle, appearance: "textfield" }}
-                value={costoMensual}
-                onChange={(e) => setCostoMensual(Number(e.target.value))}
-                required
-                min={0}
-              />
-            </div>
-
-            <div style={inputGroupStyle}>
-              <label style={labelStyle}>Duración (meses)</label>
-              <input
-                type="number"
-                style={{ ...inputStyle, appearance: "textfield" }}
-                value={duracionMeses}
-                onChange={(e) => setDuracionMeses(Number(e.target.value))}
-                required
-                min={1}
-              />
-            </div>
-
-            <div style={inputGroupStyle}>
-              <label style={labelStyle}>Inicio del cursado</label>
-              <input
-                type="date"
-                style={inputStyle}
-                value={inicioCursado}
-                onChange={(e) => setInicioCursado(e.target.value)}
-                required
-              />
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "center", gap: "1rem" }}>
-              <button
-                type="submit"
-                style={buttonCrearCarreraStyle}
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#1565c0")}
-                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#1976d2")}
-              >
-                Crear Carrera
-              </button>
-              <button
-                type="button"
-                style={{ ...buttonCrearCarreraStyle, backgroundColor: "#f44336" }}
-                onClick={onRequestClose} // Cierra el modal
-              >
-                Cancelar
-              </button>
-            </div>
-          </form>
+      <form onSubmit={handleSubmit}>
+        <div style={inputGroupStyle}>
+          <label style={labelStyle}>Nombre de la carrera</label>
+          <input
+            type="text"
+            style={inputStyle}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
         </div>
-      </div>
-    </Modal>
+
+        <div style={inputGroupStyle}>
+          <label style={labelStyle}>Costo mensual</label>
+          <input
+            type="number"
+            style={{ ...inputStyle, appearance: "textfield" }}
+            value={costoMensual}
+            onChange={(e) => setCostoMensual(Number(e.target.value))}
+            required
+            min={0}
+          />
+        </div>
+
+        <div style={inputGroupStyle}>
+          <label style={labelStyle}>Duración (meses)</label>
+          <input
+            type="number"
+            style={{ ...inputStyle, appearance: "textfield" }}
+            value={duracionMeses}
+            onChange={(e) => setDuracionMeses(Number(e.target.value))}
+            required
+            min={1}
+          />
+        </div>
+
+        <div style={inputGroupStyle}>
+          <label style={labelStyle}>Inicio del cursado</label>
+          <input
+            type="date"
+            style={inputStyle}
+            value={inicioCursado}
+            onChange={(e) => setInicioCursado(e.target.value)}
+            required
+          />
+        </div>
+
+        <div style={buttonGroupStyle}>
+          <button
+            type="submit"
+            style={buttonStyle}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#1565c0")}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#1976d2")}
+          >
+            Crear Carrera
+          </button>
+          <button
+            type="button"
+            style={{ ...buttonStyle, backgroundColor: "#ccc", color: "#333" }}
+            onClick={onRequestClose}
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 
 // === Estilos ===
-const containerStyle: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  height: "100vh",
-  background: "linear-gradient(to right, #e9f1f7, #ffffff)",
-};
 
 const cardStyle: React.CSSProperties = {
-  maxWidth: "500px",
+  maxWidth: "520px",
   width: "100%",
   backgroundColor: "#ffffff",
   borderRadius: "12px",
@@ -193,21 +165,24 @@ const inputStyle: React.CSSProperties = {
   color: "#333",
   padding: "0.75rem",
   fontSize: "1rem",
-  transition: "border-color 0.3s",
 };
 
-const buttonCrearCarreraStyle: React.CSSProperties = {
-  padding: "0.5rem 1rem",
-  backgroundColor: "#1976d2", // Azul como el de los otros botones
+const buttonGroupStyle: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  gap: "1rem",
+  marginTop: "1.5rem",
+};
+
+const buttonStyle: React.CSSProperties = {
+  padding: "0.6rem 1.4rem",
+  backgroundColor: "#1976d2",
   color: "white",
   border: "none",
   borderRadius: "6px",
   cursor: "pointer",
   fontWeight: 600,
   fontSize: "1rem",
-  width: "60%", // Hacemos que el botón tenga un tamaño más ajustado
-  maxWidth: "280px", // Limita el tamaño máximo
-  transition: "background-color 0.3s ease",
 };
 
 export default CrearCarrera;

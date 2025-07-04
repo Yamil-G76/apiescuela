@@ -7,11 +7,8 @@ import PublicRoutes from "./components/routes/PublicRoutes";
 import AdminRoutes from "./components/routes/AdminRoutes";
 import AlumnoRoutes from "./components/routes/AlumnoRoutes";
 import Forbidden from "./views/Forbidden";
-import VerAlumnos from "./views/admin/listaAlumnsos";
-import CrearCarrera from "./views/admin/AddCarrera";
+import VerAlumnos from "./views/admin/VerAlumnos";
 import VerCarreras from "./views/admin/listaCarreras"
-import AsignarCarrera from "./views/admin/asignarCarreras"
-import CargarPago from "./views/admin/cargarPago";
 import VerPagos from "./views/admin/VerPagos";
 import MisPagos from "./views/alumno/PagosAlumno";
 import MiPerfil from "./views/alumno/perfil";
@@ -30,10 +27,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardAdmin />} />
           <Route path="/singin" element={<Singin />} />
           <Route path="/admin/alumnos/lista" element={<VerAlumnos />} />
-          <Route path="/admin/carrera/nueva" element={<CrearCarrera />} />
-          <Route path="/admin/carrera/lista" element={<VerCarreras />} />
-          <Route path="/admin/carrera/asignar" element={<AsignarCarrera />} /> 
-          <Route path="/admin/cargar/pago" element={<CargarPago />} />  
+          <Route path="/admin/carrera/lista" element={<VerCarreras />} />  
           <Route path="/admin/ver/pago" element={<VerPagos />} />          
         </Route>
 

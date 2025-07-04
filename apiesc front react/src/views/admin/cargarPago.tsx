@@ -1,222 +1,128 @@
-import { useEffect, useState } from "react";
+ import { useState } from "react";
 
-type Alumno = {
-  id: number;
-  username: string;
-  userdetail?: {
-    firstname: string;
-    lastname: string;
-  };
-};
+interface ModalPagoProps {
+  idUsuarioCarrera: number;
+  costoMensual: number;
+  onClose: () => void;
+  onSuccess: () => void;
+}
 
-type Carrera = {
-  id_carrera: number;
-  name: string;
-  id_usuarioxcarrera: number;
-  costo_mensual: number;
-};
-
-function CargarPago() {
-  const [alumnos, setAlumnos] = useState<Alumno[]>([]);
-  const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<Alumno | null>(null);
-  const [carrerasAsignadas, setCarrerasAsignadas] = useState<Carrera[]>([]);
-  const [idUsuarioCarrera, setIdUsuarioCarrera] = useState<number | "">("");
-  const [cuotaAfectada, setCuotaAfectada] = useState<number | "">("");
-  const [monto, setMonto] = useState<number | "">("");
-
+function ModalPago({ idUsuarioCarrera, costoMensual, onClose, onSuccess }: ModalPagoProps) {
+  const [cuota, setCuota] = useState<number | "">("");
+  const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    if (!token) return;
-    fetch("http://127.0.0.1:8000/users/all", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then(setAlumnos)
-      .catch(console.error);
-  }, [token]);
-
-  useEffect(() => {
-    if (!alumnoSeleccionado || !token) {
-      setCarrerasAsignadas([]);
-      return;
-    }
-
-    fetch(`http://127.0.0.1:8000/usuario/carrera/relaciones/${alumnoSeleccionado.id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setCarrerasAsignadas(data);
-      })
-      .catch(console.error);
-  }, [alumnoSeleccionado, token]);
-
-  const handleEnviarPago = async () => {
-    if (!idUsuarioCarrera || !cuotaAfectada || !monto) {
-      alert("Completa todos los campos");
+  const handleEnviar = async () => {
+    if (!cuota) {
+      alert("Por favor ingresa la cuota afectada");
       return;
     }
 
     try {
+      setLoading(true);
       const res = await fetch("http://127.0.0.1:8000/payments/new", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}` },
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           id_usuarioxcarrera: idUsuarioCarrera,
-          cuota_afectada: cuotaAfectada,
-          amount: monto,
+          cuota_afectada: cuota,
+          amount: costoMensual,
         }),
       });
 
       if (res.ok) {
-        alert("Pago cargado con éxito");
-        setCuotaAfectada("");
-        setMonto("");
-        setIdUsuarioCarrera("");
+        alert("Pago registrado correctamente");
+        setCuota("");
+        onSuccess();
+        onClose();
       } else {
         const err = await res.json();
-        alert("Error al cargar el pago: " + (err.detail || JSON.stringify(err)));
+        alert("Error al registrar pago: " + (err.detail || JSON.stringify(err)));
       }
     } catch (error) {
-      console.error("Error al enviar pago:", error);
+      console.error("Error en el envío:", error);
       alert("Error de red");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={formWrapper}>
-      <h2 style={formTitle}>Cargar Pago</h2>
+    <div style={modalOverlay}>
+      <div style={modalContent}>
+        <h3>Registrar Pago</h3>
 
-      <div style={formGrid}>
-        <div style={formGroup}>
-          <label>Alumno</label>
-          <select
-            value={alumnoSeleccionado?.id || ""}
-            onChange={(e) => {
-              const id = Number(e.target.value);
-              const alumno = alumnos.find((a) => a.id === id) || null;
-              setAlumnoSeleccionado(alumno);
-              setIdUsuarioCarrera("");
-              setMonto("");
+        <label>Cuota Afectada:</label>
+        <input
+          type="number"
+          value={cuota}
+          onChange={(e) => setCuota(e.target.value === "" ? "" : parseInt(e.target.value))}
+          style={{ padding: "0.5rem", width: "100%", marginBottom: "1rem" }}
+        />
+
+        <label>Monto:</label>
+        <input
+          type="number"
+          value={costoMensual}
+          disabled
+          style={{ padding: "0.5rem", width: "100%", backgroundColor: "#eee", marginBottom: "1.5rem" }}
+        />
+
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <button
+            onClick={onClose}
+            style={{
+              padding: "0.5rem 1rem",
+              background: "#999",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
             }}
-            style={inputStyle}
           >
-            <option value="">-- Seleccionar alumno --</option>
-            {alumnos.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.userdetail?.firstname} {a.userdetail?.lastname} ({a.username})
-              </option>
-            ))}
-          </select>
+            Cancelar
+          </button>
+          <button
+            onClick={handleEnviar}
+            disabled={loading}
+            style={{
+              padding: "0.5rem 1rem",
+              background: "#1976d2",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+            }}
+          >
+            {loading ? "Enviando..." : "Confirmar"}
+          </button>
         </div>
-
-        {alumnoSeleccionado && (
-          <>
-            <div style={formGroup}>
-              <label>Carrera</label>
-              <select
-                value={idUsuarioCarrera === "" ? "" : String(idUsuarioCarrera)}
-                onChange={(e) => {
-                  const idUc = parseInt(e.target.value);
-                  setIdUsuarioCarrera(idUc);
-                  const carrera = carrerasAsignadas.find((c) => c.id_usuarioxcarrera === idUc);
-                  setMonto(carrera?.costo_mensual ?? "");
-                }}
-                style={inputStyle}
-              >
-                <option value="">-- Seleccionar carrera --</option>
-                {carrerasAsignadas.map((c) => (
-                  <option key={c.id_usuarioxcarrera} value={c.id_usuarioxcarrera}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div style={formGroup}>
-              <label>Cuota afectada</label>
-              <input
-                type="number"
-                value={cuotaAfectada}
-                onChange={(e) =>
-                  setCuotaAfectada(e.target.value === "" ? "" : parseInt(e.target.value))
-                }
-                style={inputStyle}
-              />
-            </div>
-
-            <div style={formGroup}>
-              <label>Monto</label>
-              <input
-                type="number"
-                value={monto}
-                disabled
-                style={{ ...inputStyle, backgroundColor: "#eee" }}
-              />
-            </div>
-          </>
-        )}
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.5rem" }}>
-        <button style={buttonStyle} onClick={handleEnviarPago}>
-          Enviar Pago
-        </button>
       </div>
     </div>
   );
 }
 
-// === ESTILOS ===
+const modalOverlay: React.CSSProperties = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: "rgba(0,0,0,0.4)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
+};
 
-const formWrapper: React.CSSProperties = {
+const modalContent: React.CSSProperties = {
   backgroundColor: "#fff",
   padding: "2rem",
-  borderRadius: "12px",
-  width: "100%",
-  maxWidth: "600px",
-  fontFamily: "'Segoe UI', sans-serif",
-};
-
-const formTitle: React.CSSProperties = {
-  color: "#1565c0",
-  fontWeight: 700,
-  fontSize: "1.5rem",
-  marginBottom: "1.5rem",
-  textAlign: "center",
-};
-
-const formGrid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: "1rem 1.5rem",
-};
-
-const formGroup: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-};
-
-const inputStyle: React.CSSProperties = {
-  padding: "0.5rem",
-  borderRadius: "6px",
-  border: "1px solid #ccc",
-  fontSize: "1rem",
-  marginTop: "0.3rem",
-};
-
-const buttonStyle: React.CSSProperties = {
-  backgroundColor: "#1565c0",
-  color: "white",
-  padding: "0.75rem 1.5rem",
-  border: "none",
   borderRadius: "8px",
-  fontWeight: 600,
-  fontSize: "1rem",
-  cursor: "pointer",
+  boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
+  width: "100%",
+  maxWidth: "400px",
 };
 
-export default CargarPago;
+export default ModalPago;
